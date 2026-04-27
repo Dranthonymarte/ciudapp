@@ -1,0 +1,44 @@
+# CLAUDE.md — CiudApp · Índice de Sesión
+
+> Carga en CADA sesión. Apunta a archivos verdad, no duplica contenido.
+
+## PROYECTO
+- Nombre: **CiudApp** — Red ciudadana B2G para Venezuela
+- Fase: 2 — MVP Core (sem 3-8)
+- Stack: React 18 + Vite | Supabase | Cloudflare Pages | Leaflet | Zustand
+- Piloto: Chacao (Caracas)
+- Código fuente: aún no iniciado. Scaffold pendiente en Fase 2.
+- Repo GitHub: pendiente de crear.
+
+## ARCHIVOS VERDAD — CARGAR EN ORDEN
+1. **reglas/REGLAS-PERMANENTES.md** — TOKEN GUARD, CONDUCTA, ARQUITECTURA (siempre)
+2. **contexto/CTX-01-proyecto.md** — Descripción + stack (si trabajas en producto)
+3. **contexto/CTX-02-negocio.md** — Equipo, equity, hitos (si toca negocios)
+4. **contexto/CTX-03-stack-tech.md** — Stack detallado (si trabajas en tech)
+5. **contexto/CTX-04-equipo.md** — Roles y horarios (si necesitas coordinación)
+
+## ESQUEMA SUPABASE (miniatura)
+usuarios | municipios | categorías | reportes | alertas | equipos | asignaciones
+
+(Schema completo en docs/desarrollador/README.md)
+
+## RUTAS
+- ciudapp.com/ → App ciudadano (React PWA)
+- ciudapp.com/admin → Dashboard alcaldía (React)
+- Sesiones narrativas: docs/sesiones/ | Tareas cerradas: roadmap/completado/
+
+## DOCUMENTACIÓN
+- docs/desarrollador/ → Arquitectura, roadmap, stack, auditoría
+- docs/fundadores/ → Contexto Anthony
+- docs/usuario/ → Manuales (cuando existan)
+
+## SKILLS ACTIVAS
+Detectadas automáticamente: frontend-design, pptx, docx, xlsx, pdf, file-reading
+
+## PRÓXIMO PASO
+Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
+
+## HISTÓRICO
+✅ 2026-04-23 — sistema-skills-comandos-scripts
+✅ 2026-04-23 — limpieza-estructura-docs
+✅ 2026-04-23 — deuda-docs-150-lineas

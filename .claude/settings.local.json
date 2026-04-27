@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__73e43c7f-cfc2-4fa1-ac17-03a62b8bb0d3__get_themes",
+      "mcp__73e43c7f-cfc2-4fa1-ac17-03a62b8bb0d3__generate",
+      "mcp__73e43c7f-cfc2-4fa1-ac17-03a62b8bb0d3__read_gamma",
+      "WebSearch",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__resize_window",
+      "mcp__Claude_in_Chrome__find",
+      "mcp__Claude_in_Chrome__tabs_create_mcp",
+      "mcp__2f2918f4-2ddc-4654-8b43-0d7e61c0b17f__list_organizations",
+      "mcp__2f2918f4-2ddc-4654-8b43-0d7e61c0b17f__get_cost",
+      "mcp__2f2918f4-2ddc-4654-8b43-0d7e61c0b17f__confirm_cost",
+      "mcp__2f2918f4-2ddc-4654-8b43-0d7e61c0b17f__create_project",
+      "mcp__2f2918f4-2ddc-4654-8b43-0d7e61c0b17f__get_project_url",
+      "mcp__2f2918f4-2ddc-4654-8b43-0d7e61c0b17f__get_publishable_keys",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CiudApp — Red Ciudadana de Seguridad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<style>
+:root {
+  --bg: #F4F6FB;
+  --surface: #FFFFFF;
+  --sidebar-bg: #1A1F3C;
+  --sidebar-text: rgba(255,255,255,0.65);
+  --sidebar-active: #FFFFFF;
+  --cta: #E8614A;
+  --cta-hover: #D44F38;
+  --primary: #003F8A;
+  --accent: #FFD700;
+  --text-main: #0D0F1A;
+  --text-sub: #6B7280;
+  --radius-card: 14px;
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.08);
+  --danger: #E63946;
+  --warning: #FF9800;
+  --info: #29B6F6;
+  --success: #2DC653;
+  --border-light: #E8ECF4;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --sidebar-w: 220px;
+  --topbar-h: 60px;
+  --bottom-nav-h: 64px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; font-family: var(--font-body); overflow: hidden; background: var(--bg); color: var(--text-main); }
+
+/* ===================== SPLASH ===================== */
+.splash {
+  position: fixed; inset: 0; background: var(--sidebar-bg);
+  z-index: 9999; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  transition: opacity 0.5s;
+}
+.splash.hidden { opacity: 0; pointer-events: none; }
+.splash-logo {
+  width: 76px; height: 76px; background: var(--primary); border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  animation: splashPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 0 40px rgba(0,63,138,0.5);
+}
+@keyframes splashPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.splash-title { font-family: var(--font-display); font-size: 34px; font-weight: 800; color: #fff; letter-spacing: -1px; animation: fadeUp 0.5s 0.2s both; }
+.splash-title span { color: var(--accent); }
+.splash-subtitle { font-size: 13px; color: rgba(255,255,255,0.5); animation: fadeUp 0.5s 0.3s both; }
+.splash-progress { width: 180px; height: 2px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; animation: fadeUp 0.4s 0.4s both; }
+.splash-progress-bar { height: 100%; background: var(--cta); animation: loadBar 1.5s 0.5s ease forwards; width: 0%; }
+@keyframes loadBar { to{width:100%} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ===================== DESKTOP SHELL ≥1024px ===================== */
+.desktop-shell {
+  display: none;
+  width: 100vw; height: 100vh;
+  grid-template-columns: var(--sidebar-w) 1fr 55vw;
+  grid-template-rows: var(--topbar-h) 1fr;
+  grid-template-areas:
+    "sidebar topbar topbar"
+    "sidebar main   maparea";
+}
+
+/* ---- SIDEBAR ---- */
+.sidebar {
+  grid-area: sidebar;
+  grid-row: 1 / -1;
+  background: var(--sidebar-bg);
+  display: flex; flex-direction: column;
+  padding: 28px 0 20px;
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: 11px;
+  padding: 0 20px 32px;
+}
+.sidebar-logo-icon {
+  width: 36px; height: 36px; background: var(--primary); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,63,138,0.4);
+}
+.sidebar-logo-icon svg { width: 20px; height: 20px; }
+.sidebar-logo-text {
+  font-family: var(--font-display); font-weight: 800; font-size: 18px; color: #fff; letter-spacing: -0.3px;
+}
+.sidebar-logo-text span { color: var(--accent); }
+
+.sidebar-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.25); padding: 0 20px 8px; margin-top: 8px;
+}
+
+.sidebar-nav { flex: 1; padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  color: var(--sidebar-text); font-size: 13px; font-weight: 500;
+  transition: all 0.18s; user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+.nav-item.active { background: var(--sidebar-active); color: var(--sidebar-bg); font-weight: 700; }
+.nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+.nav-item-badge {
+  margin-left: auto; background: var(--danger); color: #fff;
+  border-radius: 10px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+}
+.nav-item.active .nav-item-badge { background: var(--sidebar-bg); color: #fff; }
+
+.sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 12px 20px; }
+
+.sidebar-footer { padding: 0 12px; }
+.sidebar-version { font-size: 11px; color: rgba(255,255,255,0.2); padding: 14px 12px 0; letter-spacing: 0.3px; }
+
+/* ---- TOPBAR ---- */
+.topbar {
+  grid-area: topbar;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.topbar-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text-main); }
+.topbar-date { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
+.topbar-spacer { flex: 1; }
+.topbar-icon-btn {
+  width: 36px; height: 36px; border-radius: 10px; background: var(--bg);
+  border: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: border-color 0.15s;
+}
+.topbar-icon-btn:hover { border-color: #c5cce0; background: #fff; }
+.topbar-icon-btn svg { width: 17px; height: 17px; color: var(--text-sub); }
+.notif-dot {
+  width: 7px; height: 7px; background: var(--danger); border-radius: 50%;
+  position: absolute; top: 7px; right: 7px; border: 2px solid var(--surface);
+  animation: pulseDot 2s infinite;
+}
+@keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.7} }
+.topbar-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 12px; color: #fff; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,63,138,0.3);
+}
+
+/* ---- MAIN CONTENT ---- */
+.main-content {
+  grid-area: main;
+  background: var(--bg);
+  overflow-y: auto; padding: 22px 20px;
+  scrollbar-width: thin; scrollbar-color: #dde2ef transparent;
+}
+
+/* stat cards */
+.stat-cards-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px; }
+.stat-card {
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: 16px 16px 14px; box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light); position: relative; overflow: hidden;
+}
+.stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.stat-card-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.stat-card-icon svg { width: 18px; height: 18px; }
+.stat-card-badge {
+  padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+}
+.badge-danger { background: #FEE2E2; color: var(--danger); }
+.badge-warning { background: #FEF3C7; color: #D97706; }
+.badge-info { background: #DBEAFE; color: var(--primary); }
+.badge-success { background: #D1FAE5; color: #059669; }
+.stat-card-num {
+  font-family: var(--font-display); font-size: 30px; font-weight: 800;
+  line-height: 1; margin-bottom: 3px; color: var(--text-main);
+}
+.stat-card-label { font-size: 12px; color: var(--text-sub); font-weight: 500; }
+.stat-card-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 0 0 var(--radius-card) var(--radius-card); }
+
+/* incidents section */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+}
+.section-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-main); }
+.section-count {
+  background: var(--bg); border: 1px solid var(--border-light);
+  border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--text-sub); font-weight: 500;
+}
+
+.incident-row {
+  background: var(--surface); border-radius: var(--radius-card);
+  border: 1px solid var(--border-light); padding: 11px 14px;
+  display: flex; align-items: center; gap: 11px;
+  margin-bottom: 7px; cursor: pointer;
+  transition: all 0.15s; box-shadow: var(--shadow-card);
+}
+.incident-row:hover { border-color: #c5cce0; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+.inc-icon-wrap {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.inc-icon-wrap.danger { background: #FEE2E2; }
+.inc-icon-wrap.warning { background: #FEF3C7; }
+.inc-icon-wrap.info { background: #DBEAFE; }
+.inc-icon-wrap.success { background: #D1FAE5; }
+.inc-info { flex: 1; min-width: 0; }
+.inc-category { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 1px; }
+.inc-category.danger { color: var(--danger); }
+.inc-category.warning { color: #D97706; }
+.inc-category.info { color: var(--primary); }
+.inc-category.success { color: #059669; }
+.inc-title { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inc-location { font-size: 11px; color: var(--text-sub); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inc-time { font-size: 11px; color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
+.sev-badge {
+  padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+}
+.inc-view-btn {
+  background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px;
+  padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--text-sub);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.inc-view-btn:hover { border-color: var(--primary); color: var(--primary); background: #EEF4FF; }
+.live-pill {
+  background: #FEE2E2; color: var(--danger); border-radius: 20px;
+  padding: 2px 8px; font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+}
+.live-dot { width: 5px; height: 5px; background: var(--danger); border-radius: 50%; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* filter pills shared */
+.filter-pills-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+.filter-pills-row::-webkit-scrollbar { display: none; }
+
+/* ---- MAP PANEL ---- */
+.map-area { grid-area: maparea; position: relative; }
+#map { width: 100%; height: 100%; }
+.leaflet-container { background: #0D0F1A !important; font-family: var(--font-body) !important; }
+
+/* ===================== MAP OVERLAYS (shared) ===================== */
+.map-pills {
+  position: absolute; top: 12px; left: 0; right: 0; z-index: 700;
+  display: flex; gap: 7px; padding: 0 14px;
+  overflow-x: auto; scrollbar-width: none; pointer-events: none;
+}
+.map-pills::-webkit-scrollbar { display: none; }
+.map-pills > * { pointer-events: all; }
+.map-pill {
+  background: rgba(26,31,60,0.92); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50px; padding: 7px 14px; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.7); cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(16px); box-shadow: 0 2px 10px rgba(0,0,0,0.35); flex-shrink: 0;
+  transition: all 0.18s;
+}
+.map-pill:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
+.map-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.map-pill.danger.active { background: var(--danger); border-color: var(--danger); }
+.map-pill.warning.active { background: var(--warning); border-color: var(--warning); color: #0D0F1A; }
+.map-pill.info.active { background: var(--info); border-color: var(--info); color: #0D0F1A; }
+.map-pill.success.active { background: var(--success); border-color: var(--success); color: #0D0F1A; }
+.map-style-btn {
+  background: rgba(26,31,60,0.92); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50px; padding: 7px 14px; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.7); cursor: pointer; backdrop-filter: blur(16px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35); transition: all 0.18s; white-space: nowrap;
+}
+.map-style-btn:hover { color: #fff; }
+
+.alert-banner {
+  position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+  z-index: 800; background: rgba(230,57,70,0.95); backdrop-filter: blur(16px);
+  border-radius: 50px; padding: 10px 20px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap;
+  animation: alertSlide 0.4s ease; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(230,57,70,0.4);
+}
+@keyframes alertSlide { from{transform:translateX(-50%) translateY(-20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+
+.city-pill {
+  position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+  z-index: 700; background: rgba(26,31,60,0.92); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50px; padding: 8px 18px; font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.75); backdrop-filter: blur(16px); cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: color 0.15s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4); white-space: nowrap;
+}
+.city-pill:hover { color: #fff; }
+
+.route-alert-card {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 700; background: rgba(26,31,60,0.92); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50px; padding: 8px 16px;
+  display: flex; align-items: center; gap: 12px; backdrop-filter: blur(16px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.route-alert-card:hover { border-color: rgba(255,255,255,0.3); }
+.route-alert-card.active { background: rgba(0,63,138,0.5); border-color: var(--primary); }
+.route-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); }
+.route-label.active { color: #fff; }
+.toggle-switch { width: 36px; height: 20px; background: rgba(255,255,255,0.15); border-radius: 10px; position: relative; cursor: pointer; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+.toggle-switch.on { background: var(--primary); border-color: var(--primary); }
+.toggle-knob { width: 14px; height: 14px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s; }
+.toggle-switch.on .toggle-knob { transform: translateX(16px); }
+
+.map-top-right {
+  position: absolute; top: 12px; right: 14px; z-index: 700;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.map-top-right > * { pointer-events: all; }
+.legend {
+  background: rgba(26,31,60,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 14px; backdrop-filter: blur(16px); min-width: 172px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+.legend-title { font-family: var(--font-display); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+.legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.6); }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.map-btn {
+  background: rgba(26,31,60,0.85); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 5px 10px; color: rgba(255,255,255,0.6);
+  font-family: var(--font-body); font-size: 11px; cursor: pointer; display: flex;
+  align-items: center; gap: 6px; transition: all 0.2s; backdrop-filter: blur(16px);
+}
+.map-btn:hover { color: #fff; }
+.map-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* Cluster */
+.custom-cluster { background: transparent !important; }
+.cluster-icon { width: 40px; height: 40px; background: #1A3A8A; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 14px; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+.cluster-icon.large { width: 48px; height: 48px; background: var(--primary); font-size: 16px; }
+.user-pin { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), #0D7CFF); border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: #fff; box-shadow: 0 0 0 4px rgba(0,63,138,0.3), 0 4px 12px rgba(0,0,0,0.5); }
+
+/* Popup */
+.leaflet-popup-content-wrapper { background: #1A1F3C !important; color: #F0F2FF !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important; padding: 0 !important; }
+.leaflet-popup-content { margin: 0 !important; padding: 14px !important; font-family: var(--font-body) !important; }
+.leaflet-popup-tip { background: #1A1F3C !important; }
+.leaflet-popup-close-button { color: rgba(255,255,255,0.4) !important; font-size: 18px !important; right: 8px !important; top: 8px !important; }
+.leaflet-popup-close-button:hover { color: #fff !important; }
+.leaflet-control-attribution { display: none !important; }
+.leaflet-control-zoom { border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 10px !important; overflow: hidden; }
+.leaflet-control-zoom a { background: #1A1F3C !important; color: rgba(255,255,255,0.6) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; width: 34px !important; height: 34px !important; line-height: 34px !important; }
+.leaflet-control-zoom a:hover { background: #252b50 !important; color: #fff !important; }
+
+/* ===================== INCIDENT SHEET (shared) ===================== */
+.sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 849; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+.sheet-overlay.open { opacity: 1; pointer-events: all; }
+.incident-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-radius: 22px 22px 0 0;
+  border-top: 1px solid var(--border-light); z-index: 850;
+  transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.12); max-height: 80vh; overflow-y: auto; scrollbar-width: thin;
+}
+.incident-sheet.open { transform: translateY(0); }
+.sheet-handle-wrapper { padding: 12px 0 4px; display: flex; justify-content: center; cursor: grab; }
+.sheet-handle { width: 40px; height: 4px; background: #E8ECF4; border-radius: 4px; }
+.sheet-body { padding: 8px 22px 32px; }
+.sheet-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.sheet-title { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; line-height: 1.2; }
+.sheet-location { font-size: 13px; color: var(--text-sub); display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.sheet-meta-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.sheet-tag { background: var(--bg); border: 1px solid var(--border-light); border-radius: 50px; padding: 5px 12px; font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 5px; }
+.sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sheet-action-btn { padding: 12px; background: var(--bg); border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-sub); font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.sheet-action-btn:hover { border-color: var(--primary); color: var(--primary); background: #EEF4FF; }
+.sheet-action-btn.confirm { background: #EEF4FF; border-color: var(--primary); color: var(--primary); }
+
+/* ===================== REPORT MODAL ===================== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: #fff; border-radius: 20px; width: 460px; max-width: 92vw; max-height: 88vh;
+  overflow-y: auto; transform: scale(0.92) translateY(16px); transition: transform 0.28s;
+  scrollbar-width: thin; box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-progress-wrap { height: 4px; background: #F4F6FB; border-radius: 4px 4px 0 0; overflow: hidden; }
+.modal-progress-bar { height: 100%; background: var(--cta); border-radius: 4px; transition: width 0.3s; width: 33%; }
+
+.modal-header { padding: 20px 22px 0; display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text-main); }
+.modal-close { width: 30px; height: 30px; background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); font-size: 15px; transition: all 0.15s; }
+.modal-close:hover { border-color: var(--danger); color: var(--danger); }
+.modal-body { padding: 0 22px 24px; }
+
+.form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-sub); margin-bottom: 8px; display: block; }
+.category-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+.category-btn { background: var(--bg); border: 1.5px solid var(--border-light); border-radius: 10px; padding: 11px 6px; cursor: pointer; text-align: center; transition: all 0.15s; color: var(--text-sub); }
+.category-btn:hover { border-color: var(--primary); }
+.category-btn.selected { background: #EEF4FF; border-color: var(--primary); color: var(--primary); }
+.category-btn .cat-icon { font-size: 22px; margin-bottom: 4px; display: block; }
+.category-btn .cat-name { font-size: 10px; font-weight: 600; }
+
+.form-input { width: 100%; background: var(--bg); border: 1.5px solid var(--border-light); border-radius: 10px; padding: 11px 13px; color: var(--text-main); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.15s; margin-bottom: 16px; resize: none; }
+.form-input:focus { border-color: var(--primary); background: #fff; }
+.form-input::placeholder { color: #B0B8C8; }
+
+.location-box { background: #EEF4FF; border: 1.5px dashed var(--primary); border-radius: 10px; padding: 11px 13px; display: flex; align-items: center; gap: 10px; margin-bottom: 18px; cursor: pointer; transition: background 0.15s; }
+.location-box:hover { background: #E0EAFF; }
+.location-text { flex: 1; font-size: 13px; color: var(--primary); font-weight: 500; }
+
+.urgency-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.urgency-btn { flex: 1; padding: 10px; background: var(--bg); border: 1.5px solid var(--border-light); border-radius: 10px; cursor: pointer; text-align: center; font-size: 12px; font-weight: 600; transition: all 0.15s; color: var(--text-sub); }
+.urgency-btn.low { color: #059669; }
+.urgency-btn.medium { color: #D97706; }
+.urgency-btn.high { color: var(--danger); }
+.urgency-btn.selected.low { background: #D1FAE5; border-color: #059669; }
+.urgency-btn.selected.medium { background: #FEF3C7; border-color: #D97706; }
+.urgency-btn.selected.high { background: #FEE2E2; border-color: var(--danger); }
+
+.btn-submit { width: 100%; background: var(--cta); color: #fff; border: none; border-radius: 12px; padding: 14px; font-family: var(--font-display); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.18s; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.3px; position: relative; overflow: hidden; }
+.btn-submit:hover { background: var(--cta-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,97,74,0.4); }
+.btn-submit:active { transform: translateY(0); }
+
+.ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.25); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none; }
+@keyframes rippleAnim { to{transform:scale(4);opacity:0} }
+
+/* ===================== TOAST ===================== */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: #fff; border: 1px solid var(--border-light); border-left: 3px solid var(--success); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; min-width: 270px; animation: toastIn 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+@keyframes toastIn { from{transform:translateX(80px);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast.removing { animation: toastOut 0.3s ease forwards; }
+@keyframes toastOut { to{transform:translateX(80px);opacity:0} }
+.toast-icon { font-size: 18px; }
+.toast-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.toast-msg { font-size: 12px; color: var(--text-sub); }
+
+/* popup content */
+.popup-content { min-width: 170px; }
+.popup-type { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.popup-title { font-family: 'Syne',sans-serif; font-size: 14px; font-weight: 700; color: #F0F2FF; margin-bottom: 4px; }
+.popup-meta { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #DDE2EF; border-radius: 4px; }
+
+/* ===================== MOBILE SHELL <1024px ===================== */
+.mobile-shell { display: none; position: fixed; inset: 0; }
+
+/* Glass topbar */
+.mobile-topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 800;
+  display: flex; align-items: center; padding: 0 16px; justify-content: space-between;
+  background: rgba(255,255,255,0.18); backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.mobile-logo-text { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.3px; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
+.mobile-logo-text span { color: var(--accent); }
+.mobile-top-icons { display: flex; gap: 9px; }
+.mobile-icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.mobile-icon-btn svg { width: 17px; height: 17px; color: #fff; }
+
+/* Map fills top 55vh */
+.mobile-map-wrap { position: fixed; top: 0; left: 0; right: 0; height: 55vh; z-index: 10; }
+.mobile-map-wrap #mapMobile { width: 100%; height: 100%; }
+
+/* Bottom sheet */
+.mobile-bottom-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: calc(45vh + 28px); z-index: 600;
+  background: #fff; border-radius: 24px 24px 0 0;
+  box-shadow: 0 -6px 30px rgba(0,0,0,0.12);
+  transition: height 0.32s cubic-bezier(0.32,0.72,0,1);
+  display: flex; flex-direction: column;
+  padding-bottom: calc(var(--bottom-nav-h) + 8px);
+}
+.mobile-bottom-sheet.expanded { height: 85vh; }
+.bs-handle-wrap { padding: 10px 0 8px; display: flex; justify-content: center; cursor: grab; flex-shrink: 0; }
+.bs-handle { width: 38px; height: 4px; background: #DDE2EF; border-radius: 4px; }
+.bs-header { padding: 0 16px 10px; flex-shrink: 0; }
+.bs-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.bs-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-main); }
+.bs-count-badge { background: #EEF4FF; color: var(--primary); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+.bs-filter-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bs-filter-pills::-webkit-scrollbar { display: none; }
+.bs-pill { background: var(--bg); border: 1px solid var(--border-light); border-radius: 20px; padding: 5px 13px; font-size: 11px; font-weight: 600; color: var(--text-sub); cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
+.bs-pill:hover { border-color: var(--primary); color: var(--text-main); }
+.bs-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* Mobile incident cards grid */
+.bs-incidents { flex: 1; overflow-y: auto; padding: 0 12px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; align-content: start; scrollbar-width: thin; }
+.mob-inc-card {
+  background: var(--bg); border: 1px solid var(--border-light); border-radius: var(--radius-card);
+  padding: 12px 10px; cursor: pointer; transition: all 0.15s;
+}
+.mob-inc-card:hover { border-color: #c5cce0; transform: translateY(-1px); box-shadow: 0 3px 12px rgba(0,0,0,0.07); }
+.mob-inc-type-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; margin-bottom: 8px; }
+.mob-inc-type-icon.danger { background: #FEE2E2; }
+.mob-inc-type-icon.warning { background: #FEF3C7; }
+.mob-inc-type-icon.info { background: #DBEAFE; }
+.mob-inc-type-icon.success { background: #D1FAE5; }
+.mob-inc-addr { font-size: 11px; font-weight: 600; color: var(--text-main); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mob-inc-time { font-size: 10px; color: var(--text-sub); margin-bottom: 6px; }
+.mob-inc-sev { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+.mob-inc-sev.danger { background: #FEE2E2; color: var(--danger); }
+.mob-inc-sev.warning { background: #FEF3C7; color: #D97706; }
+.mob-inc-sev.info { background: #DBEAFE; color: var(--primary); }
+.mob-inc-sev.success { background: #D1FAE5; color: #059669; }
+
+/* FAB */
+.fab-reportar {
+  position: fixed; bottom: 80px; right: 20px; z-index: 700;
+  background: var(--cta); color: #fff; border: none; border-radius: 50px;
+  padding: 13px 22px; font-family: var(--font-display); font-size: 14px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(232,97,74,0.45); transition: all 0.18s; overflow: hidden;
+}
+.fab-reportar:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,97,74,0.5); }
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-h);
+  background: #fff; border-top: 1px solid var(--border-light); z-index: 900;
+  display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.07);
+}
+.bnav-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; color: var(--text-sub); transition: color 0.18s;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; position: relative;
+}
+.bnav-tab svg { width: 20px; height: 20px; }
+.bnav-tab.active { color: var(--primary); }
+.bnav-dot {
+  position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: var(--primary);
+  opacity: 0; transition: opacity 0.18s;
+}
+.bnav-tab.active .bnav-dot { opacity: 1; }
+
+/* ===================== RESPONSIVE SWITCH ===================== */
+@media (min-width: 1024px) {
+  .desktop-shell { display: grid; }
+  .mobile-shell, .mobile-topbar, .mobile-map-wrap, .mobile-bottom-sheet,
+  .fab-reportar, .bottom-nav { display: none !important; }
+  .toast-container { bottom: 24px; right: 24px; left: auto; }
+}
+@media (max-width: 1023px) {
+  .desktop-shell { display: none !important; }
+  .mobile-shell { display: block; }
+  .mobile-topbar, .mobile-map-wrap, .mobile-bottom-sheet, .fab-reportar, .bottom-nav { display: flex; }
+  .mobile-bottom-sheet { display: flex; }
+  .toast-container { bottom: calc(var(--bottom-nav-h) + 12px); right: 12px; left: 12px; }
+  .toast { min-width: unset; }
+  .mobile-map-wrap .map-pills { top: 60px; }
+  .mobile-map-wrap .alert-banner { top: 108px; }
+  .mobile-map-wrap .city-pill { bottom: 12px; }
+  .mobile-map-wrap .route-alert-card { top: 60px; display: none; }
+  .mobile-map-wrap .map-top-right { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="splash-logo">
+    <svg viewBox="0 0 48 48" fill="none" width="36" height="36">
+      <path d="M24 4C16.268 4 10 10.268 10 18c0 10 14 26 14 26s14-16 14-26c0-7.732-6.268-14-14-14z" fill="#fff" opacity="0.95"/>
+      <path d="M24 11l-6 2.5v5c0 3.5 2.5 6.8 6 8 3.5-1.2 6-4.5 6-8v-5L24 11z" fill="#003F8A" opacity="0.9"/>
+      <path d="M22 18l1.5 1.5L26 16" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="splash-title">Ciud<span>App</span></div>
+  <div class="splash-subtitle">Red Ciudadana de Seguridad — Venezuela</div>
+  <div class="splash-progress"><div class="splash-progress-bar"></div></div>
+</div>
+
+<!-- =========================================================
+     DESKTOP SHELL ≥1024px
+     ========================================================= -->
+<div class="desktop-shell" id="desktopShell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 4C16.268 4 10 10.268 10 18c0 10 14 26 14 26s14-16 14-26c0-7.732-6.268-14-14-14z" fill="#fff" opacity="0.95"/>
+          <path d="M24 11l-6 2.5v5c0 3.5 2.5 6.8 6 8 3.5-1.2 6-4.5 6-8v-5L24 11z" fill="#003F8A" opacity="0.85"/>
+          <path d="M22 18l1.5 1.5L26 16" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-text">Ciud<span>App</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="desktopNavSwitch(this,'incidents')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Inicio
+      </div>
+      <div class="nav-item" onclick="desktopNavSwitch(this,'incidents')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incidentes
+        <span class="nav-item-badge">5</span>
+      </div>
+      <div class="nav-item" onclick="desktopNavSwitch(this,'map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Mapa
+      </div>
+      <div class="nav-item" onclick="openModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Reportar
+      </div>
+      <div class="nav-item" onclick="desktopNavSwitch(this,'stats')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Estadísticas
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="nav-item" onclick="showToast('Configuración disponible en versión completa','⚙️ Config')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" onclick="showToast('Perfil disponible en versión completa','👤 Mi Perfil')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mi Perfil
+      </div>
+    </div>
+    <div class="sidebar-version">v0.2.0 · Piloto Caracas</div>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title" id="desktopPageTitle">Incidentes Recientes</div>
+      <div class="topbar-date" id="desktopDate"></div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-icon-btn" onclick="showToast('Tienes 3 alertas nuevas en tu zona','Notificaciones')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-dot"></div>
+    </div>
+    <div class="topbar-avatar">AT</div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- Stat cards -->
+    <div class="stat-cards-row">
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:#EEF4FF;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-card-badge badge-info">+8 vs ayer</div>
+        </div>
+        <div class="stat-card-num" id="count-today">63</div>
+        <div class="stat-card-label">Total hoy</div>
+        <div class="stat-card-accent" style="background:var(--primary)"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:#FEE2E2;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="stat-card-badge badge-danger">LIVE</div>
+        </div>
+        <div class="stat-card-num" id="count-urgent" style="color:var(--danger)">5</div>
+        <div class="stat-card-label">Urgentes</div>
+        <div class="stat-card-accent" style="background:var(--danger)"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:#FEF3C7;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-card-badge badge-warning">Activos</div>
+        </div>
+        <div class="stat-card-num" id="count-active" style="color:#D97706">17</div>
+        <div class="stat-card-label">En proceso</div>
+        <div class="stat-card-accent" style="background:var(--warning)"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:#D1FAE5;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="stat-card-badge badge-success">65%</div>
+        </div>
+        <div class="stat-card-num" id="count-resolved" style="color:#059669">41</div>
+        <div class="stat-card-label">Resueltos</div>
+        <div class="stat-card-accent" style="background:var(--success)"></div>
+      </div>
+    </div>
+
+    <!-- Incidents list -->
+    <div class="section-header">
+      <div class="section-title">Incidentes Recientes</div>
+      <div class="section-count" id="desktopCount">17 registros</div>
+    </div>
+    <div class="filter-pills-row" style="margin-bottom:14px;">
+      <button class="bs-pill active" onclick="filterDesktopList(this,'all')" style="font-family:var(--font-body);">Todos</button>
+      <button class="bs-pill" onclick="filterDesktopList(this,'danger')" style="font-family:var(--font-body);">🚨 Urgente</button>
+      <button class="bs-pill" onclick="filterDesktopList(this,'warning')" style="font-family:var(--font-body);">⚠️ Alerta</button>
+      <button class="bs-pill" onclick="filterDesktopList(this,'info')" style="font-family:var(--font-body);">ℹ️ Aviso</button>
+      <button class="bs-pill" onclick="filterDesktopList(this,'success')" style="font-family:var(--font-body);">✅ Resuelto</button>
+    </div>
+    <div id="desktopIncidentsList"></div>
+  </main>
+
+  <!-- MAP PANEL -->
+  <div class="map-area" id="desktopMapArea">
+    <div id="map"></div>
+
+    <div class="map-pills" id="mapPills">
+      <div class="map-pill active" onclick="filterMapPill(this,'all')">🗺️ Todos</div>
+      <div class="map-pill danger" onclick="filterMapPill(this,'danger')">🚨 Urgente</div>
+      <div class="map-pill warning" onclick="filterMapPill(this,'warning')">⚠️ Alerta</div>
+      <div class="map-pill info" onclick="filterMapPill(this,'info')">ℹ️ Aviso</div>
+      <div class="map-pill success" onclick="filterMapPill(this,'success')">✅ Resuelto</div>
+      <div class="map-style-btn" onclick="toggleMapStyle()" id="mapStyleBtn">🌙 Oscuro</div>
+    </div>
+
+    <div class="alert-banner" id="alertBanner" onclick="dismissAlert()">
+      🚨 <span>Alerta activa: Robo en Av. Libertador, Chacao</span>
+      <span style="opacity:.6;font-size:11px">Hace 3 min</span>
+      <span style="opacity:.5;font-size:12px;margin-left:4px">✕</span>
+    </div>
+
+    <div class="route-alert-card" id="routeAlertCard" onclick="toggleRoute()" style="display:none;">
+      <span style="font-size:15px">🛣️</span>
+      <span class="route-label" id="routeLabel">Alertas en ruta</span>
+      <div class="toggle-switch" id="routeToggle"><div class="toggle-knob"></div></div>
+    </div>
+
+    <div class="city-pill" id="cityPill">
+      📍 <span id="cityName">Caracas, Venezuela</span> ▾
+    </div>
+
+    <div class="map-top-right">
+      <div class="legend">
+        <div class="legend-title">Leyenda</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Robo / Emergencia</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div>Act. sospechosa</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--info)"></div>Aviso vecinal</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Resuelto</div>
+        <div style="border-top:1px solid rgba(255,255,255,0.08);margin:8px 0 6px;padding-top:6px;font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.8px;">Capas</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="map-btn active" onclick="toggleLayer(this,'incidents')">🗺️ Incidentes</button>
+          <button class="map-btn" onclick="toggleLayer(this,'zones')">🔴 Zonas</button>
+          <button class="map-btn" onclick="toggleLayer(this,'cameras')">📹 Cámaras</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /desktop-shell -->
+
+<!-- =========================================================
+     MOBILE SHELL <1024px
+     ========================================================= -->
+<div class="mobile-shell" id="mobileShell">
+
+  <!-- Map top 55vh -->
+  <div class="mobile-map-wrap" id="mobileMapWrap">
+    <div id="mapMobile"></div>
+    <div class="map-pills" id="mapPillsMobile">
+      <div class="map-pill active" onclick="filterMapPillMobile(this,'all')">🗺️ Todos</div>
+      <div class="map-pill danger" onclick="filterMapPillMobile(this,'danger')">🚨 Urgente</div>
+      <div class="map-pill warning" onclick="filterMapPillMobile(this,'warning')">⚠️ Alerta</div>
+      <div class="map-pill info" onclick="filterMapPillMobile(this,'info')">ℹ️ Aviso</div>
+      <div class="map-pill success" onclick="filterMapPillMobile(this,'success')">✅ Resuelto</div>
+      <div class="map-style-btn" onclick="toggleMapStyleMobile()" id="mapStyleBtnMobile">🌙 Oscuro</div>
+    </div>
+    <div class="alert-banner" id="alertBannerMobile" onclick="document.getElementById('alertBannerMobile').style.display='none'">
+      🚨 <span>Alerta: Robo en Av. Libertador</span>
+      <span style="opacity:.6;font-size:11px">✕</span>
+    </div>
+    <div class="city-pill" id="cityPillMobile">
+      📍 <span id="cityNameMobile">Caracas</span> ▾
+    </div>
+  </div>
+
+  <!-- Glass topbar -->
+  <header class="mobile-topbar">
+    <span class="mobile-logo-text">Ciud<span>App</span></span>
+    <div class="mobile-top-icons">
+      <div class="mobile-icon-btn" onclick="showToast('Buscar próximamente','🔍 Buscar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div class="mobile-icon-btn" onclick="showToast('3 alertas nuevas en tu zona','🔔 Notificaciones')" style="position:relative;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid rgba(26,31,60,0.3);"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bottom sheet -->
+  <div class="mobile-bottom-sheet" id="mobileBottomSheet">
+    <div class="bs-handle-wrap" id="bsHandleWrap">
+      <div class="bs-handle"></div>
+    </div>
+    <div class="bs-header">
+      <div class="bs-title-row">
+        <span class="bs-title">Incidentes Cercanos</span>
+        <span class="bs-count-badge" id="mobileIncCount">17</span>
+      </div>
+      <div class="bs-filter-pills" id="mobileFilterPills">
+        <div class="bs-pill active" onclick="filterMobile(this,'all')">Todos</div>
+        <div class="bs-pill" onclick="filterMobile(this,'danger')">🚨 Urgente</div>
+        <div class="bs-pill" onclick="filterMobile(this,'warning')">⚠️ Alerta</div>
+        <div class="bs-pill" onclick="filterMobile(this,'info')">ℹ️ Aviso</div>
+        <div class="bs-pill" onclick="filterMobile(this,'success')">✅ Resuelto</div>
+      </div>
+    </div>
+    <div class="bs-incidents" id="mobileIncidentGrid"></div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab-reportar" onclick="openModal(); addRipple(event,this)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Reportar
+  </button>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <div class="bnav-tab active" onclick="mobileNavSwitch(this,'map')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      Mapa<div class="bnav-dot"></div>
+    </div>
+    <div class="bnav-tab" onclick="mobileNavSwitch(this,'incidents')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alertas<div class="bnav-dot"></div>
+    </div>
+    <div class="bnav-tab" onclick="openModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span style="color:var(--cta)">Reportar</span><div class="bnav-dot"></div>
+    </div>
+    <div class="bnav-tab" onclick="mobileNavSwitch(this,'alerts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Noticias<div class="bnav-dot"></div>
+    </div>
+    <div class="bnav-tab" onclick="mobileNavSwitch(this,'profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil<div class="bnav-dot"></div>
+    </div>
+  </nav>
+
+</div><!-- /mobile-shell -->
+
+<!-- INCIDENT BOTTOM SHEET (shared) -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeIncidentSheet()"></div>
+<div class="incident-sheet" id="incidentSheet">
+  <div class="sheet-handle-wrapper"><div class="sheet-handle"></div></div>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-progress-wrap"><div class="modal-progress-bar" id="modalProgressBar"></div></div>
+    <div class="modal-header">
+      <div class="modal-title">Nuevo Reporte</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="modal-body">
+      <label class="form-label">Tipo de incidente</label>
+      <div class="category-grid">
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">🚗</span><span class="cat-name">Robo Vehículo</span></div>
+        <div class="category-btn selected" onclick="selectCategory(this)"><span class="cat-icon">🏠</span><span class="cat-name">Robo Casa</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">🔫</span><span class="cat-name">Violencia</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">👁️</span><span class="cat-name">Sospechoso</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">🚑</span><span class="cat-name">Emergencia</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">💡</span><span class="cat-name">Aviso Vecinal</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">🐶</span><span class="cat-name">Mascota Perdida</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">🔦</span><span class="cat-name">Sin Luz</span></div>
+        <div class="category-btn" onclick="selectCategory(this)"><span class="cat-icon">📋</span><span class="cat-name">Otro</span></div>
+      </div>
+
+      <label class="form-label">Descripción</label>
+      <textarea class="form-input" rows="3" placeholder="Describe brevemente lo que ocurrió..."></textarea>
+
+      <label class="form-label">Ubicación</label>
+      <div class="location-box" onclick="simulateLocation()">
+        <span style="font-size:18px">📍</span>
+        <span class="location-text" id="locationText">Obtener mi ubicación actual</span>
+      </div>
+
+      <label class="form-label">Nivel de urgencia</label>
+      <div class="urgency-row">
+        <div class="urgency-btn low" onclick="selectUrgency(this)">🟢 Bajo</div>
+        <div class="urgency-btn medium selected" onclick="selectUrgency(this)">🟡 Medio</div>
+        <div class="urgency-btn high" onclick="selectUrgency(this)">🔴 Alto</div>
+      </div>
+
+      <button class="btn-submit" onclick="submitReport(); addRipple(event,this)">
+        🚨 Enviar Reporte
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================
+// DATA
+// ============================================
+const INCIDENTS = [
+  { id:1, type:'danger', icon:'🚗', category:'Robo de Vehículo', title:'Hurto de vehículo en la vía', location:'Av. Luis Roche, Altamira', lat:10.4965, lng:-66.8499, time:'Hace 5 min', votes:23, isLive:true },
+  { id:2, type:'danger', icon:'🔫', category:'Violencia', title:'Disparo reportado cerca', location:'C.C. Los Palos Grandes', lat:10.4952, lng:-66.8482, time:'Hace 12 min', votes:41, isLive:true },
+  { id:3, type:'warning', icon:'👁️', category:'Actividad Sospechosa', title:'Personas merodeando en el área', location:'Av. Principal Las Mercedes', lat:10.4825, lng:-66.8631, time:'Hace 28 min', votes:17, isLive:false },
+  { id:4, type:'info', icon:'🔦', category:'Aviso Vecinal', title:'Sin luz desde hace 3 horas', location:'Petare Norte, Miranda', lat:10.4784, lng:-66.8163, time:'Hace 1h', votes:58, isLive:false },
+  { id:5, type:'warning', icon:'🏠', category:'Robo Residencial', title:'Intento de robo en vivienda', location:'La Castellana, Chacao', lat:10.4970, lng:-66.8612, time:'Hace 2h', votes:32, isLive:false },
+  { id:6, type:'success', icon:'✅', category:'Resuelto', title:'Incidente controlado por autoridades', location:'Plaza Venezuela', lat:10.4890, lng:-66.8901, time:'Hace 3h', votes:89, isLive:false },
+  { id:7, type:'danger', icon:'🚑', category:'Emergencia Médica', title:'Accidente de tránsito con heridos', location:'Bulevar Sabana Grande', lat:10.4862, lng:-66.8789, time:'Hace 8 min', votes:15, isLive:true },
+  { id:8, type:'warning', icon:'🚗', category:'Robo de Vehículo', title:'Vehículo robado reportado', location:'Av. Venezuela, El Rosal', lat:10.4895, lng:-66.8560, time:'Hace 45 min', votes:28, isLive:false },
+  { id:9, type:'info', icon:'📢', category:'Aviso Vecinal', title:'Manifestación bloquea vía', location:'Calle Chacao, Municipio Chacao', lat:10.4922, lng:-66.8545, time:'Hace 20 min', votes:34, isLive:false },
+  { id:10, type:'warning', icon:'👁️', category:'Actividad Sospechosa', title:'Grupo sospechoso en la zona', location:'La Candelaria, Caracas', lat:10.4940, lng:-66.9044, time:'Hace 1h 15min', votes:12, isLive:false },
+  { id:11, type:'danger', icon:'🔫', category:'Violencia', title:'Enfrentamiento armado reportado', location:'Av. Sucre, Catia', lat:10.5031, lng:-66.9304, time:'Hace 30 min', votes:67, isLive:true },
+  { id:12, type:'info', icon:'🐶', category:'Aviso Vecinal', title:'Perro perdido zona residencial', location:'Los Dos Caminos, Miranda', lat:10.5012, lng:-66.8356, time:'Hace 2h', votes:8, isLive:false },
+  { id:13, type:'success', icon:'✅', category:'Resuelto', title:'Vehículo robado recuperado', location:'Las Mercedes, Baruta', lat:10.4765, lng:-66.8487, time:'Hace 4h', votes:45, isLive:false },
+  { id:14, type:'warning', icon:'🏠', category:'Robo Residencial', title:'Robo a residencia en urbanización', location:'La Lagunita, El Hatillo', lat:10.4612, lng:-66.8179, time:'Hace 3h 30min', votes:21, isLive:false },
+  { id:15, type:'danger', icon:'🚗', category:'Carjacking', title:'Carjacking en intersección', location:'Bello Monte, Caracas', lat:10.4838, lng:-66.8751, time:'Hace 15 min', votes:53, isLive:true },
+  { id:16, type:'info', icon:'🔦', category:'Aviso Vecinal', title:'Falla de alumbrado público', location:'La Florida, Caracas', lat:10.4878, lng:-66.8838, time:'Hace 5h', votes:19, isLive:false },
+  { id:17, type:'warning', icon:'👁️', category:'Actividad Sospechosa', title:'Vehículo sospechoso estacionado', location:'Santa Fe Norte, Baruta', lat:10.4721, lng:-66.8426, time:'Hace 1h 45min', votes:14, isLive:false },
+];
+
+// ============================================
+// MAP INIT — desktop uses #map, mobile uses #mapMobile
+// ============================================
+let mapD, mapM, markersLayerD, markersLayerM;
+let mapDarkD = true, mapDarkM = true;
+const TILE_DARK = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const TILE_LIGHT = 'https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png';
+let tileD, tileM;
+
+const isMobile = () => window.innerWidth < 1024;
+
+function initMapDesktop() {
+  if (mapD) return;
+  mapD = L.map('map', { center:[10.488,-66.860], zoom:13, zoomControl:true, attributionControl:false });
+  tileD = L.tileLayer(TILE_DARK, { subdomains:'abcd', maxZoom:19 }).addTo(mapD);
+  markersLayerD = buildCluster(mapD);
+  addUserPin(mapD);
+  INCIDENTS.forEach(inc => addMarkerTo(inc, markersLayerD));
+  mapD.on('click', onMapClick);
+}
+
+function initMapMobile() {
+  if (mapM) return;
+  mapM = L.map('mapMobile', { center:[10.488,-66.860], zoom:13, zoomControl:true, attributionControl:false });
+  tileM = L.tileLayer(TILE_DARK, { subdomains:'abcd', maxZoom:19 }).addTo(mapM);
+  markersLayerM = buildCluster(mapM);
+  addUserPin(mapM);
+  INCIDENTS.forEach(inc => addMarkerTo(inc, markersLayerM));
+  mapM.on('click', onMapClick);
+}
+
+function buildCluster(mapRef) {
+  const ml = L.markerClusterGroup({
+    maxClusterRadius:55, showCoverageOnHover:false, zoomToBoundsOnClick:true,
+    iconCreateFunction(cluster) {
+      const n = cluster.getChildCount(), lg = n > 10;
+      return L.divIcon({ html:`<div class="cluster-icon${lg?' large':''}">${n}</div>`, className:'custom-cluster', iconSize:lg?[48,48]:[40,40], iconAnchor:lg?[24,24]:[20,20] });
+    }
+  });
+  mapRef.addLayer(ml);
+  return ml;
+}
+
+function addUserPin(mapRef) {
+  const icon = L.divIcon({ className:'', html:`<div class="user-pin">AT</div>`, iconSize:[38,38], iconAnchor:[19,19] });
+  L.marker([10.490,-66.864], { icon, zIndexOffset:1000 }).addTo(mapRef).bindTooltip('Tu ubicación', { permanent:false, direction:'top' });
+}
+
+function onMapClick(e) {
+  const lat = e.latlng.lat.toFixed(5), lng = e.latlng.lng.toFixed(5);
+  const el = document.getElementById('locationText');
+  if (el) { el.textContent = `Lat: ${lat}, Lng: ${lng}`; el.style.color = 'var(--success)'; }
+}
+
+function addMarkerTo(incident, layer) {
+  const colors = { danger:'#E63946', warning:'#FF9800', info:'#29B6F6', success:'#2DC653' };
+  const color = colors[incident.type] || '#888';
+  const icon = L.divIcon({
+    className:'',
+    html:`<div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2px solid rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.5);position:relative;">
+      <span style="transform:rotate(45deg);font-size:16px;line-height:1">${incident.icon}</span>
+      ${incident.isLive ? `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;background:#E63946;border-radius:50%;border:2px solid #0D0F1A;animation:blink 1s infinite"></span>` : ''}
+    </div>`,
+    iconSize:[36,36], iconAnchor:[18,36], popupAnchor:[0,-38]
+  });
+  const m = L.marker([incident.lat, incident.lng], { icon });
+  m.on('click', () => openIncidentSheet(incident));
+  m.addTo(layer);
+  incident._marker = m;
+}
+
+// ============================================
+// MAP STYLE TOGGLE
+// ============================================
+function toggleMapStyle() {
+  mapDarkD = !mapDarkD;
+  const btn = document.getElementById('mapStyleBtn');
+  mapD.removeLayer(tileD);
+  tileD = L.tileLayer(mapDarkD ? TILE_DARK : TILE_LIGHT, { subdomains:'abcd', maxZoom:19 }).addTo(mapD);
+  btn.textContent = mapDarkD ? '🌙 Oscuro' : '☀️ Claro';
+}
+function toggleMapStyleMobile() {
+  mapDarkM = !mapDarkM;
+  const btn = document.getElementById('mapStyleBtnMobile');
+  mapM.removeLayer(tileM);
+  tileM = L.tileLayer(mapDarkM ? TILE_DARK : TILE_LIGHT, { subdomains:'abcd', maxZoom:19 }).addTo(mapM);
+  btn.textContent = mapDarkM ? '🌙 Oscuro' : '☀️ Claro';
+}
+
+// ============================================
+// FILTER — MAP PILLS
+// ============================================
+function filterMapPill(el, type) {
+  document.querySelectorAll('#mapPills .map-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  filterMapLayer(markersLayerD, mapD, type);
+  renderDesktopList(type);
+}
+function filterMapPillMobile(el, type) {
+  document.querySelectorAll('#mapPillsMobile .map-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  filterMapLayer(markersLayerM, mapM, type);
+  renderMobileGrid(type);
+}
+function filterMapLayer(ml, mapRef, type) {
+  ml.clearLayers();
+  (type === 'all' ? INCIDENTS : INCIDENTS.filter(i => i.type === type)).forEach(inc => addMarkerTo(inc, ml));
+}
+
+// ============================================
+// FLY TO
+// ============================================
+function flyToIncident(id) {
+  const inc = INCIDENTS.find(i => i.id === id);
+  if (!inc) return;
+  const mapRef = isMobile() ? mapM : mapD;
+  if (mapRef) mapRef.flyTo([inc.lat, inc.lng], 16, { duration:1.2 });
+  setTimeout(() => openIncidentSheet(inc), 600);
+}
+
+// ============================================
+// DESKTOP LIST RENDER
+// ============================================
+function renderDesktopList(filter = 'all') {
+  const filtered = filter === 'all' ? INCIDENTS : INCIDENTS.filter(i => i.type === filter);
+  document.getElementById('desktopCount').textContent = `${filtered.length} registros`;
+  const sevLabel = { danger:'Urgente', warning:'Alerta', info:'Aviso', success:'Resuelto' };
+  document.getElementById('desktopIncidentsList').innerHTML = filtered.map(inc => `
+    <div class="incident-row" onclick="flyToIncident(${inc.id})">
+      <div class="inc-icon-wrap ${inc.type}">${inc.icon}</div>
+      <div class="inc-info">
+        <div class="inc-category ${inc.type}">${inc.category}</div>
+        <div class="inc-title">${inc.title}</div>
+        <div class="inc-location">📍 ${inc.location}</div>
+      </div>
+      <div class="inc-time">${inc.time}</div>
+      ${inc.isLive ? `<div class="live-pill"><div class="live-dot"></div>LIVE</div>` : `<div class="sev-badge badge-${inc.type === 'danger' ? 'danger' : inc.type === 'warning' ? 'warning' : inc.type === 'info' ? 'info' : 'success'}">${sevLabel[inc.type]}</div>`}
+      <button class="inc-view-btn" onclick="event.stopPropagation();flyToIncident(${inc.id})">Ver →</button>
+    </div>
+  `).join('');
+}
+
+function filterDesktopList(el, type) {
+  document.querySelectorAll('.main-content .bs-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderDesktopList(type);
+}
+
+// ============================================
+// MOBILE GRID RENDER
+// ============================================
+function renderMobileGrid(filter = 'all') {
+  const filtered = filter === 'all' ? INCIDENTS : INCIDENTS.filter(i => i.type === filter);
+  document.getElementById('mobileIncCount').textContent = filtered.length;
+  const shortAddr = loc => loc.split(',')[0];
+  document.getElementById('mobileIncidentGrid').innerHTML = filtered.map(inc => `
+    <div class="mob-inc-card" onclick="flyToIncidentMobile(${inc.id})">
+      <div class="mob-inc-type-icon ${inc.type}">${inc.icon}</div>
+      <div class="mob-inc-addr">${shortAddr(inc.location)}</div>
+      <div class="mob-inc-time">${inc.time}</div>
+      <span class="mob-inc-sev ${inc.type}">${inc.isLive ? '🔴 LIVE' : inc.category.split(' ')[0]}</span>
+    </div>
+  `).join('');
+}
+
+function filterMobile(el, type) {
+  document.querySelectorAll('#mobileFilterPills .bs-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderMobileGrid(type);
+  filterMapLayer(markersLayerM, mapM, type);
+}
+
+function flyToIncidentMobile(id) {
+  const inc = INCIDENTS.find(i => i.id === id);
+  if (!inc) return;
+  if (mapM) mapM.flyTo([inc.lat, inc.lng], 16, { duration:1.2 });
+  setTimeout(() => openIncidentSheet(inc), 600);
+}
+
+// ============================================
+// INCIDENT BOTTOM SHEET
+// ============================================
+function openIncidentSheet(incident) {
+  const colors = { danger:'var(--danger)', warning:'#D97706', info:'var(--primary)', success:'#059669' };
+  const color = colors[incident.type] || 'var(--text-sub)';
+  document.getElementById('sheetBody').innerHTML = `
+    <div class="sheet-type" style="color:${color}">${incident.icon} ${incident.category}</div>
+    <div class="sheet-title">${incident.title}</div>
+    <div class="sheet-location">📍 ${incident.location}</div>
+    <div class="sheet-meta-row">
+      <div class="sheet-tag">⏱️ ${incident.time}</div>
+      <div class="sheet-tag">👍 ${incident.votes} confirmaciones</div>
+      ${incident.isLive ? `<div class="sheet-tag" style="color:var(--danger);border-color:var(--danger);">🔴 EN VIVO</div>` : ''}
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-action-btn confirm" onclick="vote(event,this,${incident.id});this.textContent='✅ Confirmado'">👍 Confirmar</button>
+      <button class="sheet-action-btn" onclick="showToast('Ruta segura calculada','🛣️ Evitar zona')">🛣️ Evitar zona</button>
+      <button class="sheet-action-btn" onclick="showToast('Reportando como falso...','⚠️ Falso')">🚫 Falso</button>
+      <button class="sheet-action-btn" onclick="showToast('Compartido con vecinos','🔗 Compartir')">🔗 Compartir</button>
+    </div>
+  `;
+  document.getElementById('incidentSheet').classList.add('open');
+  document.getElementById('sheetOverlay').classList.add('open');
+}
+function closeIncidentSheet() {
+  document.getElementById('incidentSheet').classList.remove('open');
+  document.getElementById('sheetOverlay').classList.remove('open');
+}
+
+// ============================================
+// MODAL
+// ============================================
+function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function handleOverlayClick(e) { if (e.target === e.currentTarget) closeModal(); }
+function selectCategory(el) { document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); }
+function selectUrgency(el) { document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); }
+function simulateLocation() {
+  const el = document.getElementById('locationText');
+  el.textContent = '📍 Av. Libertador, Chacao (detectado)';
+  el.style.color = 'var(--success)';
+  showToast('Ubicación detectada correctamente','GPS activo');
+}
+
+function submitReport() {
+  closeModal();
+  const newInc = {
+    id: Date.now(), type:'danger', icon:'🚨', category:'Nuevo Reporte',
+    title:'Reporte enviado por el usuario', location:'Tu ubicación actual',
+    lat: 10.490 + (Math.random()-0.5)*0.02,
+    lng: -66.860 + (Math.random()-0.5)*0.02,
+    time:'Ahora mismo', votes:1, isLive:true
+  };
+  INCIDENTS.unshift(newInc);
+  if (markersLayerD) addMarkerTo(newInc, markersLayerD);
+  if (markersLayerM) addMarkerTo(newInc, markersLayerM);
+  renderDesktopList(); renderMobileGrid();
+  const ca = document.getElementById('count-active');
+  const ct = document.getElementById('count-today');
+  const cu = document.getElementById('count-urgent');
+  if (ca) ca.textContent = parseInt(ca.textContent)+1;
+  if (ct) ct.textContent = parseInt(ct.textContent)+1;
+  if (cu) cu.textContent = parseInt(cu.textContent)+1;
+  showToast('Tu reporte fue enviado a las autoridades y vecinos cercanos','✅ Reporte enviado');
+  const mapRef = isMobile() ? mapM : mapD;
+  if (mapRef) mapRef.flyTo([newInc.lat, newInc.lng], 15, { duration:1.5 });
+}
+
+// ============================================
+// TOASTS
+// ============================================
+function showToast(message, title = 'CiudApp') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span class="toast-icon">🛡️</span><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-msg">${message}</div></div>`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+// ============================================
+// MAP LAYER TOGGLES
+// ============================================
+function toggleLayer(btn, layer) {
+  btn.classList.toggle('active');
+  if (layer === 'incidents' && markersLayerD) {
+    btn.classList.contains('active') ? mapD.addLayer(markersLayerD) : mapD.removeLayer(markersLayerD);
+  }
+}
+
+// ============================================
+// ALERT / ROUTE / CITY
+// ============================================
+function dismissAlert() { document.getElementById('alertBanner').style.display = 'none'; }
+let routeActive = false;
+function toggleRoute() {
+  routeActive = !routeActive;
+  document.getElementById('routeToggle').classList.toggle('on', routeActive);
+  document.getElementById('routeAlertCard').classList.toggle('active', routeActive);
+  const label = document.getElementById('routeLabel');
+  label.classList.toggle('active', routeActive);
+  label.textContent = routeActive ? 'Alertas en ruta: ON' : 'Alertas en ruta';
+  if (routeActive) showToast('Recibirás alertas en tu ruta habitual','🛣️ Alertas en ruta activadas');
+}
+
+const cities = ['Caracas, Venezuela', 'Maracaibo, Zulia', 'Valencia, Carabobo', 'Barquisimeto, Lara'];
+let currentCity = 0;
+function cycleCityDesktop() {
+  currentCity = (currentCity+1) % cities.length;
+  document.getElementById('cityName').textContent = cities[currentCity];
+  showToast(`Cambiando a ${cities[currentCity]}`,'📍 Ciudad actualizada');
+}
+function cycleCityMobile() {
+  currentCity = (currentCity+1) % cities.length;
+  document.getElementById('cityNameMobile').textContent = cities[currentCity].split(',')[0];
+  showToast(`Cambiando a ${cities[currentCity]}`,'📍 Ciudad actualizada');
+}
+
+// ============================================
+// NAV
+// ============================================
+function desktopNavSwitch(el, page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const titles = { incidents:'Incidentes Recientes', map:'Mapa Interactivo', stats:'Estadísticas' };
+  document.getElementById('desktopPageTitle').textContent = titles[page] || 'Inicio';
+  if (page === 'stats') showToast('Estadísticas disponibles en v1.0','📊 Próximamente');
+}
+function mobileNavSwitch(el, tab) {
+  document.querySelectorAll('.bnav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (tab === 'alerts') showToast('3 nuevas alertas en tu zona','🔔 Alertas');
+  if (tab === 'profile') showToast('Perfil disponible en versión completa','👤 Perfil');
+}
+
+// ============================================
+// RIPPLE
+// ============================================
+function addRipple(e, btn) {
+  const r = btn.getBoundingClientRect(), size = Math.max(r.width, r.height);
+  const sp = document.createElement('span');
+  sp.className = 'ripple';
+  sp.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
+  btn.appendChild(sp);
+  sp.addEventListener('animationend', () => sp.remove());
+}
+
+// ============================================
+// MOBILE BOTTOM SHEET DRAG
+// ============================================
+function initMobileSheetDrag() {
+  const sheet = document.getElementById('mobileBottomSheet');
+  const handle = document.getElementById('bsHandleWrap');
+  if (!sheet || !handle) return;
+  let startY = 0, dragging = false;
+  const onStart = e => { dragging = true; startY = e.touches ? e.touches[0].clientY : e.clientY; };
+  const onMove = e => {
+    if (!dragging) return;
+    const curY = e.touches ? e.touches[0].clientY : e.clientY;
+    if (startY - curY > 50) { sheet.classList.add('expanded'); dragging = false; }
+    else if (curY - startY > 50) { sheet.classList.remove('expanded'); dragging = false; }
+  };
+  const onEnd = () => { dragging = false; };
+  handle.addEventListener('touchstart', onStart, { passive:true });
+  document.addEventListener('touchmove', onMove, { passive:true });
+  document.addEventListener('touchend', onEnd);
+  handle.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+}
+
+// ============================================
+// TOPBAR DATE
+// ============================================
+function setDesktopDate() {
+  const el = document.getElementById('desktopDate');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('es-VE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+// ============================================
+// SPLASH
+// ============================================
+function hideSplash() {
+  setTimeout(() => document.getElementById('splash').classList.add('hidden'), 2200);
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  setDesktopDate();
+  hideSplash();
+
+  if (!isMobile()) {
+    initMapDesktop();
+    renderDesktopList();
+    document.getElementById('cityPill').addEventListener('click', cycleCityDesktop);
+    setTimeout(() => { document.getElementById('routeAlertCard').style.display = 'flex'; }, 2600);
+  } else {
+    initMapMobile();
+    renderMobileGrid();
+    document.getElementById('cityPillMobile').addEventListener('click', cycleCityMobile);
+    initMobileSheetDrag();
+  }
+
+  window.addEventListener('resize', () => {
+    if (!isMobile() && !mapD) { initMapDesktop(); renderDesktopList(); }
+    if (isMobile() && !mapM) { initMapMobile(); renderMobileGrid(); initMobileSheetDrag(); }
+  });
+
+  setInterval(() => {
+    const inc = INCIDENTS[Math.floor(Math.random()*INCIDENTS.length)];
+    if (Math.random() > 0.6) showToast(`${inc.icon} ${inc.title} — ${inc.location}`,'🔔 Nuevo reporte cercano');
+  }, 12000);
+});
+</script>
+</body>
+</html>
