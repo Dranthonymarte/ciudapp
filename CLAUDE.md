@@ -42,3 +42,5 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-04-23 — sistema-skills-comandos-scripts
 ✅ 2026-04-23 — limpieza-estructura-docs
 ✅ 2026-04-23 — deuda-docs-150-lineas
+✅ 2026-04-27 — scaffold-react-fase2-semana3 + push GitHub
+✅ 2026-04-27 — mapa-base-semana4: MapScreen + Leaflet + 10 marcadores mock Caracas + deploy Cloudflare
