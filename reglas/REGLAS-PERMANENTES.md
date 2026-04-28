@@ -70,17 +70,28 @@ Antes de escribir código de cualquier feature, definir:
 4. **Deploy checklist**: Al cerrar tarea con servicios externos → confirmar que las vars están en Cloudflare Pages (Ajustes → Variables de entorno) ANTES de marcar completo
 
 ## AUTOEVALUACIÓN AL CERRAR TAREA — OBLIGATORIO
-Antes de marcar cualquier tarea como completada, verificar contra el roadmap:
-1. Leer las filas de la semana en `docs/desarrollador/ROADMAP*.md` (o equivalente)
+Antes de marcar cualquier tarea como completada, verificar en orden:
+1. Leer las filas de la semana en `docs/desarrollador/ROADMAP*.md`
 2. Checkear cada entregable: ¿existe el archivo? ¿hace lo que dice el roadmap?
 3. Si algún entregable dice "con datos reales de BD" → verificar query activa, no hardcode
-4. Si hay gap → cerrarlo en la misma sesión antes de /cerrar
-5. Reportar honestamente: "✅ completo / ❌ gap detectado → [acción]"
+4. **Verificar preview en navegador** — screenshot o snapshot confirma que la feature se ve y funciona
+5. **Verificar env vars** — si la tarea usa servicios externos, confirmar vars en Cloudflare Pages
+6. **Verificar layout** — componentes compartidos en layout wrapper, no en pantallas individuales
+7. Si hay gap → cerrarlo en la misma sesión antes de /cerrar
+8. Reportar honestamente: "✅ completo / ❌ gap detectado → [acción]"
 No avanzar a la semana siguiente con entregables incompletos de la semana actual.
-6. Al cerrar → generar un **prompt listo para copiar-pegar** en la próxima sesión con:
+9. Al cerrar → generar un **prompt listo para copiar-pegar** en la próxima sesión con:
    - Semana que inicia
    - Primer entregable concreto
    - Archivos a tocar
+
+## FALLAS CONOCIDAS Y SUS SOLUCIONES
+| Falla | Causa | Solución permanente |
+|---|---|---|
+| Pantalla negra en prod | Env vars no configuradas en Cloudflare | Verificar Ajustes → Variables antes de /cerrar |
+| BottomNav desaparece | Componente en pantalla en vez de layout | Shared components siempre en AuthLayout/AdminLayout |
+| Deploy no se dispara | Cloudflare desconectado de GitHub | Verificar banner en Cloudflare Pages al iniciar sesión |
+| Build falla silencioso | Import de var de entorno undefined | Usar fallback `?? ''` o validar en constants.js |
 
 ## PROHIBICIONES ABSOLUTAS
 - Cambiar el stack hasta Fase 5
