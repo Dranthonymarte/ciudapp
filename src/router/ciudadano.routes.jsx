@@ -4,6 +4,7 @@ import LoginScreen      from '@/app/modules/auth/LoginScreen'
 import RegisterScreen   from '@/app/modules/auth/RegisterScreen'
 import ForgotPassword   from '@/app/modules/auth/ForgotPassword'
 import AuthGuard        from '@/app/modules/auth/AuthGuard'
+import AuthLayout       from '@/components/AuthLayout'
 
 export function ciudadanoRoutes() {
   return (
@@ -13,7 +14,9 @@ export function ciudadanoRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/*" element={
         <AuthGuard>
-          <MapScreen />
+          <AuthLayout>
+            <MapScreen />
+          </AuthLayout>
         </AuthGuard>
       } />
     </>

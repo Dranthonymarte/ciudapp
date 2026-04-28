@@ -8,7 +8,6 @@ import MapFilters from './MapFilters'
 import { useLocation } from '@/hooks/useLocation'
 import { useMapStore } from '@/store/map.store'
 import { supabase } from '@/services/supabase.client'
-import BottomNav from '@/components/BottomNav'
 import CreateReportScreen from '@/app/modules/reports/CreateReportScreen'
 import { useReportsStore } from '@/store/reports.store'
 
@@ -54,7 +53,7 @@ export default function MapScreen() {
   }, [filtroCategoria, refreshTrigger])
 
   return (
-    <div style={{ width: '100%', height: '100dvh', background: '#0A0C10', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', background: '#0A0C10', position: 'relative' }}>
       <MapFilters />
       <MapContainer
         center={CARACAS}
@@ -69,7 +68,6 @@ export default function MapScreen() {
         ))}
       </MapContainer>
 
-      <BottomNav />
       <CreateReportScreen />
     </div>
   )
