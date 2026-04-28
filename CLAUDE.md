@@ -46,3 +46,5 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-04-27 — mapa-base-semana4: MapScreen + Leaflet + 10 marcadores mock Caracas + deploy Cloudflare
 ✅ 2026-04-27 — semana4-completada: GPS (maps.service.js) + MapFilters.jsx + tablas Supabase (4) + 10 reportes seed + mapa conectado a BD
 ✅ 2026-04-27 — fase1-cerrada: nombre CiudApp, piloto Chacao, HTML superseded por React
+✅ 2026-04-27 — semana5-modulo-reportes: wizard 3 taps + 8 categorías venezolanas + foto→Storage + BottomNav + integración mapa
+✅ 2026-04-28 — semana6-autenticacion: Supabase Auth + auth.store + useAuth + LoginScreen + RegisterScreen + ForgotPassword + AuthGuard + rutas protegidas
