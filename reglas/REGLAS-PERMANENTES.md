@@ -62,6 +62,13 @@ Si en sesión activa se cumple cualquiera:
 - Nueva idea → ideas/BACKLOG.md (append con estado: pendiente)
 - Bug encontrado → seguridad/VULNERABILIDADES.md si es de seguridad
 
+## ARQUITECTURA — REGLAS PRE-IMPLEMENTACIÓN
+Antes de escribir código de cualquier feature, definir:
+1. **Layout level vs Page level**: Componentes compartidos (NavBar, BottomNav, Header, modales globales) van SIEMPRE en un layout wrapper (`AuthLayout`, `AdminLayout`), nunca dentro de una pantalla específica
+2. **Z-index contract**: Definir antes de crear overlays — Layout: 100 | Modales: 200 | Toasts: 300 | Critical: 1000
+3. **Env vars**: Cualquier servicio externo (Supabase, API keys) → listar las `VITE_*` requeridas en el mismo commit donde se usa el servicio
+4. **Deploy checklist**: Al cerrar tarea con servicios externos → confirmar que las vars están en Cloudflare Pages (Ajustes → Variables de entorno) ANTES de marcar completo
+
 ## AUTOEVALUACIÓN AL CERRAR TAREA — OBLIGATORIO
 Antes de marcar cualquier tarea como completada, verificar contra el roadmap:
 1. Leer las filas de la semana en `docs/desarrollador/ROADMAP*.md` (o equivalente)
