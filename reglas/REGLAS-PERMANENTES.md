@@ -61,6 +61,19 @@ Si en sesión activa se cumple cualquiera:
 - Nueva idea → ideas/BACKLOG.md (append con estado: pendiente)
 - Bug encontrado → seguridad/VULNERABILIDADES.md si es de seguridad
 
+## AUTOEVALUACIÓN AL CERRAR TAREA — OBLIGATORIO
+Antes de marcar cualquier tarea como completada, verificar contra el roadmap:
+1. Leer las filas de la semana en `docs/desarrollador/ROADMAP*.md` (o equivalente)
+2. Checkear cada entregable: ¿existe el archivo? ¿hace lo que dice el roadmap?
+3. Si algún entregable dice "con datos reales de BD" → verificar query activa, no hardcode
+4. Si hay gap → cerrarlo en la misma sesión antes de /cerrar
+5. Reportar honestamente: "✅ completo / ❌ gap detectado → [acción]"
+No avanzar a la semana siguiente con entregables incompletos de la semana actual.
+6. Al cerrar → generar un **prompt listo para copiar-pegar** en la próxima sesión con:
+   - Semana que inicia
+   - Primer entregable concreto
+   - Archivos a tocar
+
 ## PROHIBICIONES ABSOLUTAS
 - Cambiar el stack hasta Fase 5
 - Crear archivos .md de documentación salvo que Anthony lo pida

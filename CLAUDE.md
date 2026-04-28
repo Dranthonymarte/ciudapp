@@ -44,3 +44,5 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-04-23 — deuda-docs-150-lineas
 ✅ 2026-04-27 — scaffold-react-fase2-semana3 + push GitHub
 ✅ 2026-04-27 — mapa-base-semana4: MapScreen + Leaflet + 10 marcadores mock Caracas + deploy Cloudflare
+✅ 2026-04-27 — semana4-completada: GPS (maps.service.js) + MapFilters.jsx + tablas Supabase (4) + 10 reportes seed + mapa conectado a BD
+✅ 2026-04-27 — fase1-cerrada: nombre CiudApp, piloto Chacao, HTML superseded por React

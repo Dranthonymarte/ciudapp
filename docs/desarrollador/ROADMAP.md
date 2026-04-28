@@ -30,10 +30,10 @@ FASE 6  [Sem 25+]   → Escala y monetización        ⏳
 - [x] Documentación inicial (AUDITORIA, ARQUITECTURA, STACK, ROADMAP)
 
 ### Pendiente antes de cerrar Fase 1
-- [ ] Definir nombre definitivo: **CiudApp** o **CuidApp** (decisión de equipo)
-- [ ] Definir ciudad piloto objetivo (coordinación con Ana)
-- [ ] Piloto HTML mejorado: flujo de "crear reporte" simulado
-- [ ] Piloto HTML: responsive para móvil
+- [x] Definir nombre definitivo: **CiudApp** ✅ 2026-04-27
+- [x] Definir ciudad piloto objetivo: **Chacao, Miranda** ✅ 2026-04-27 (seed en BD)
+- [x] Piloto HTML mejorado: superseded por app React Fase 2 ✅ 2026-04-27
+- [x] Piloto HTML responsive: superseded por PWA React Fase 2 ✅ 2026-04-27
 
 ---
 
