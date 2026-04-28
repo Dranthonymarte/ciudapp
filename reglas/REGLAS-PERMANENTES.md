@@ -40,6 +40,7 @@ Si en sesión activa se cumple cualquiera:
 - Al crear una skill → guardar en skills/[categoría]/ automáticamente
 - Al crear una regla → guardar en reglas/ automáticamente
 - Al terminar tarea → actualizar roadmap/activo/ automáticamente
+- Al cerrar tarea → ejecutar `git push` automático sin pedir confirmación (Cloudflare Pages despliega solo)
 
 ## CONTEXTO — JERARQUÍA DE CARGA
 1. CLAUDE.md raíz (siempre, gratis)
