@@ -48,3 +48,4 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-04-27 — fase1-cerrada: nombre CiudApp, piloto Chacao, HTML superseded por React
 ✅ 2026-04-27 — semana5-modulo-reportes: wizard 3 taps + 8 categorías venezolanas + foto→Storage + BottomNav + integración mapa
 ✅ 2026-04-28 — semana6-autenticacion: Supabase Auth + auth.store + useAuth + LoginScreen + RegisterScreen + ForgotPassword + AuthGuard + rutas protegidas
+✅ 2026-04-28 — fixes-post-deploy: AuthLayout (BottomNav global), env vars Cloudflare, reglas arquitectura + tabla fallas conocidas
