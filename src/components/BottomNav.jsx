@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useUiStore } from '@/store/ui.store'
+import { useAuthStore } from '@/store/auth.store'
 
 const TABS = [
   { id: 'mapa',      label: 'Mapa',     icon: '🗺️',  path: '/'        },
@@ -11,8 +12,14 @@ const TABS = [
 
 export default function BottomNav() {
   const { openReportar } = useUiStore()
-  const navigate  = useNavigate()
+  const user       = useAuthStore(s => s.user)
+  const navigate   = useNavigate()
   const { pathname } = useLocation()
+
+  function handleReportar() {
+    if (!user) return navigate('/login')
+    openReportar()
+  }
 
   return (
     <nav style={{
@@ -31,7 +38,7 @@ export default function BottomNav() {
         return (
           <button
             key={tab.id}
-            onClick={() => isReportar ? openReportar() : tab.path && navigate(tab.path)}
+            onClick={() => isReportar ? handleReportar() : tab.path && navigate(tab.path)}
             style={{
               flex: 1,
               padding: isReportar ? '6px 0 10px' : '10px 0 12px',
