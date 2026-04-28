@@ -2,12 +2,15 @@ import { Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 
 const COLORS = {
-  agua: '#3B82F6',
-  luz: '#F59E0B',
-  basura: '#10B981',
-  vialidad: '#EF4444',
-  seguridad: '#8B5CF6',
-  default: '#6B7280',
+  agua:       '#3B82F6',
+  luz:        '#F59E0B',
+  basura:     '#10B981',
+  vialidad:   '#EF4444',
+  seguridad:  '#8B5CF6',
+  gas:        '#F97316',
+  salud:      '#EC4899',
+  transporte: '#06B6D4',
+  default:    '#6B7280',
 }
 
 function makeIcon(color) {
@@ -18,7 +21,7 @@ function makeIcon(color) {
       background:${color};border:2px solid #fff;
       box-shadow:0 0 6px ${color}88;
     "></div>`,
-    iconSize: [14, 14],
+    iconSize:   [14, 14],
     iconAnchor: [7, 7],
   })
 }

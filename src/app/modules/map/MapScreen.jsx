@@ -8,6 +8,9 @@ import MapFilters from './MapFilters'
 import { useLocation } from '@/hooks/useLocation'
 import { useMapStore } from '@/store/map.store'
 import { supabase } from '@/services/supabase.client'
+import BottomNav from '@/components/BottomNav'
+import CreateReportScreen from '@/app/modules/reports/CreateReportScreen'
+import { useReportsStore } from '@/store/reports.store'
 
 const CARACAS = [10.4806, -66.9036]
 
@@ -18,7 +21,7 @@ const USER_ICON = L.divIcon({
     background:#3B82F6;border:3px solid #fff;
     box-shadow:0 0 0 4px rgba(59,130,246,0.35);
   "></div>`,
-  iconSize: [16, 16],
+  iconSize:   [16, 16],
   iconAnchor: [8, 8],
 })
 
@@ -35,21 +38,20 @@ function UserMarker({ lat, lng }) {
 }
 
 export default function MapScreen() {
-  const { lat, lng } = useLocation()
+  const { lat, lng }       = useLocation()
   const { filtroCategoria } = useMapStore()
+  const { refreshTrigger }  = useReportsStore()
   const [reportes, setReportes] = useState([])
 
   useEffect(() => {
     async function cargar() {
-      const query = supabase
-        .from('reportes')
-        .select('id, titulo, categoria_id, lat, lng, estado')
-      if (filtroCategoria !== 'todas') query.eq('categoria_id', filtroCategoria)
-      const { data } = await query
+      let q = supabase.from('reportes').select('id, titulo, categoria_id, lat, lng, estado')
+      if (filtroCategoria !== 'todas') q = q.eq('categoria_id', filtroCategoria)
+      const { data } = await q
       setReportes(data ?? [])
     }
     cargar()
-  }, [filtroCategoria])
+  }, [filtroCategoria, refreshTrigger])
 
   return (
     <div style={{ width: '100%', height: '100dvh', background: '#0A0C10', position: 'relative' }}>
@@ -66,6 +68,9 @@ export default function MapScreen() {
           <IncidentMarker key={r.id} reporte={{ ...r, categoria: r.categoria_id }} />
         ))}
       </MapContainer>
+
+      <BottomNav />
+      <CreateReportScreen />
     </div>
   )
 }
