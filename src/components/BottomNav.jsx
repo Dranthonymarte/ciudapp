@@ -29,7 +29,7 @@ export default function BottomNav() {
       borderTop:   '1px solid rgba(255,255,255,0.06)',
       display:     'flex',
       paddingBottom: 'env(safe-area-inset-bottom)',
-      zIndex:      100,
+      zIndex:      900,
     }}>
       {TABS.map(tab => {
         const isReportar = tab.id === 'reportar'
