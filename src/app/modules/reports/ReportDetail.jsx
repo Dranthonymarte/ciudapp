@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { reverseGeocode } from '@/utils/geo.utils'
 import { obtenerReportePorId } from './reports.service'
+import ReportChat from './ReportChat'
 
 const COLORS = {
   agua: '#3B82F6', luz: '#F59E0B', basura: '#10B981',
@@ -123,6 +124,7 @@ export default function ReportDetail({ reporte, onClose }) {
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 12px', borderRadius: 10,
             background: 'rgba(255,255,255,0.04)',
+            marginBottom: 20,
           }}>
             <div style={{
               width: 34, height: 34, borderRadius: '50%',
@@ -137,6 +139,12 @@ export default function ReportDetail({ reporte, onClose }) {
             </div>
           </div>
         </div>
+
+        {/* Divisor chat */}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '0 16px 4px' }} />
+
+        {/* Chat bidireccional */}
+        <ReportChat reporteId={data.id} />
       </div>
     </>
   )

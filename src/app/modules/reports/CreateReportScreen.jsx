@@ -9,13 +9,16 @@ import { subirFotoReporte } from '@/services/supabase.storage'
 import { reverseGeocode } from '@/utils/geo.utils'
 
 const PASO = { CAT: 0, DETALLE: 1, CONFIRMAR: 2 }
-
 const TITULOS = ['Selecciona categoría', 'Detalles', 'Confirmar envío']
 
 export default function CreateReportScreen() {
-  const { reportarOpen, closeReportar } = useUiStore()
-  const { lat, lng } = useLocation()
+  const { reportarOpen, closeReportar, tapCoords } = useUiStore()
+  const { lat: gpsLat, lng: gpsLng } = useLocation()
   const { addReporte } = useReportsStore()
+
+  // tapCoords tiene prioridad sobre GPS
+  const lat = tapCoords?.lat ?? gpsLat
+  const lng = tapCoords?.lng ?? gpsLng
 
   const [paso,        setPaso]       = useState(PASO.CAT)
   const [categoria,   setCategoria]  = useState(null)
@@ -26,12 +29,12 @@ export default function CreateReportScreen() {
   const [direccion,   setDireccion]  = useState('')
 
   useEffect(() => {
-    if (lat && lng) reverseGeocode(lat, lng).then(setDireccion)
+    if (lat && lng) reverseGeocode(lat, lng).then(d => setDireccion(d ?? ''))
   }, [lat, lng])
 
   function reset() {
     setPaso(PASO.CAT); setCategoria(null)
-    setFoto(null); setDescripcion(''); setError(null)
+    setFoto(null); setDescripcion(''); setError(null); setDireccion('')
   }
 
   function cerrar() { reset(); closeReportar() }
@@ -64,6 +67,7 @@ export default function CreateReportScreen() {
   if (!reportarOpen) return null
 
   const pct = `${((paso + 1) / 3) * 100}%`
+  const origenLabel = tapCoords ? '📍 Tap en mapa' : '🛰 GPS automático'
 
   return (
     <div style={{
@@ -154,17 +158,33 @@ export default function CreateReportScreen() {
               ) : null}
             </div>
 
-            <div style={{
-              background: '#1A1D24', borderRadius: 12, padding: '12px 16px',
-              display: 'flex', gap: 10, alignItems: 'center',
-            }}>
-              <span>📍</span>
-              <div>
-                <div style={{ color: '#F0F2F5', fontSize: 13, fontWeight: 600 }}>Ubicación GPS</div>
-                <div style={{ color: '#8B95A5', fontSize: 11 }}>
-                  {direccion || (lat && lng ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : 'Obteniendo ubicación...')}
-                </div>
+            {/* Ubicación editable */}
+            <div style={{ background: '#1A1D24', borderRadius: 12, padding: '12px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span>📍</span>
+                <div style={{ color: '#F0F2F5', fontSize: 13, fontWeight: 600 }}>Ubicación</div>
+                <span style={{
+                  marginLeft: 'auto', fontSize: 10, color: '#3B82F6',
+                  background: 'rgba(59,130,246,0.12)', borderRadius: 6, padding: '2px 7px',
+                }}>
+                  {origenLabel}
+                </span>
               </div>
+              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>
+                {lat && lng ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : 'Sin coordenadas'}
+              </div>
+              <input
+                value={direccion}
+                onChange={e => setDireccion(e.target.value)}
+                placeholder="Dirección (editable)…"
+                style={{
+                  width: '100%', background: '#0D0F14',
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  borderRadius: 8, padding: '8px 10px',
+                  color: '#F0F2F5', fontSize: 13,
+                  fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+                }}
+              />
             </div>
 
             {foto && (
