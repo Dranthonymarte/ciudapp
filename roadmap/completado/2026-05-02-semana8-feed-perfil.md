@@ -19,17 +19,19 @@ Actualmente tabs Feed / Alertas / Perfil muestran pantalla en blanco → riesgo 
 - **Servicio:** `src/app/modules/feed/feed.service.js` ✅
 
 ### 2. ProfileScreen (3h estimadas)
-- [ ] Avatar placeholder + nombre del usuario
-- [ ] MyReports.jsx — lista de reportes del usuario autenticado
-- [ ] Botón cerrar sesión (Supabase signOut)
-- [ ] Contador de reportes enviados
-- **Archivo:** `src/app/modules/profile/ProfileScreen.jsx` + `MyReports.jsx`
-- **Servicio:** `src/app/modules/profile/profile.service.js`
+- [x] Avatar placeholder con iniciales + color hash por nombre
+- [x] MyReports.jsx — lista de reportes del usuario con FeedItem DS
+- [x] Botón cerrar sesión (Supabase signOut) con navegación a /login
+- [x] Contador de reportes (StatChip + query Supabase count)
+- [x] Ruta /perfil en ciudadano.routes.jsx con AuthGuard
+- **Archivo:** `src/app/modules/profile/ProfileScreen.jsx` + `MyReports.jsx` ✅
+- **Servicio:** `src/app/modules/profile/profile.service.js` ✅
 
-### 3. AlertBanner básico (2h estimadas)
-- [ ] Lista de alertas estáticas (mock) mientras se implementa push
-- [ ] AlertBanner.jsx — banner rojo en parte superior cuando hay alerta activa
-- **Archivo:** `src/app/modules/alerts/AlertBanner.jsx`
+### 3. AlertBanner con Supabase Realtime (2h estimadas)
+- [x] AlertBanner.jsx — Realtime INSERT listener tabla alertas
+- [x] Dismiss por alerta individual
+- [x] Estilos por nivel (info/aviso/urgente/emergencia)
+- **Archivo:** `src/app/modules/alerts/AlertBanner.jsx` ✅
 
 ### 4. Componentes UI base (2h estimadas)
 - [ ] `Spinner.jsx` — loading state reutilizable

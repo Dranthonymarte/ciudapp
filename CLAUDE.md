@@ -4,11 +4,11 @@
 
 ## PROYECTO
 - Nombre: **CiudApp** — Red ciudadana B2G para Venezuela
-- Fase: 2 — MVP Core (sem 3-8)
-- Stack: React 18 + Vite | Supabase | Cloudflare Pages | Leaflet | Zustand
+- Fase: 2 — MVP Core (sem 9 en curso)
+- Stack: React 18 + Vite | Supabase | Cloudflare Pages | Leaflet + Carto Light | Zustand
 - Piloto: Chacao (Caracas)
-- Código fuente: aún no iniciado. Scaffold pendiente en Fase 2.
-- Repo GitHub: pendiente de crear.
+- App 100% mobile-first — desktop → landing page
+- Referencia UX: SoSafe (Chile) — aplicar selectivamente
 
 ## ARCHIVOS VERDAD — CARGAR EN ORDEN
 1. **reglas/REGLAS-PERMANENTES.md** — TOKEN GUARD, CONDUCTA, ARQUITECTURA (siempre)
@@ -52,3 +52,4 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-05-02 — mobile-ui-redesign: MapScreen (header+LIVE badge+FAB geoloc) + MapFilters chips + LoginScreen splash dual-role + reverseGeocode Nominatim + deploy ✓
 ✅ 2026-05-02 — semana7-reporte-detalle: ReportDetail bottom-sheet (mini mapa estático + geocoding + badge estado + autor) + UserMarker extraído + 5 bugs críticos/medios corregidos + roadmap S7-S12 sistematizado
 ✅ 2026-05-02 — semana8-feed-perfil: FeedFilter DS (pills categoría×9 + estado×6, colores canónicos) + FeedItem redesign (elimina left-bar, badges pill DS) + FeedScreen filtrado client-side useMemo
+✅ 2026-05-02 — semana8-perfil-alertas: ProfileScreen (avatar iniciales + stats + signOut) + MyReports + profile.service + AlertBanner Realtime + ruta /perfil — visión S9 definida (chat bidireccional + map tap + landing desktop + Carto Light)

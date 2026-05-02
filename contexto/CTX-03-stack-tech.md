@@ -8,7 +8,7 @@
 
 **Hosting:** Cloudflare Pages (CDN óptimo Latinoamérica)
 
-**Mapa:** Leaflet.js + OpenStreetMap (gratuito, sin límites)
+**Mapa:** Leaflet.js + Carto Light tiles (OpenStreetMap data, aspecto limpio tipo Google Maps, gratuito, sin API key)
 
 **PWA:** Vite PWA Plugin + Web Push API
 
