@@ -67,7 +67,7 @@ export default function CreateReportScreen() {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
+      position: 'fixed', inset: 0, zIndex: 1001,
       background: '#0A0C10',
       display: 'flex', flexDirection: 'column',
       animation: 'slideUp 0.28s cubic-bezier(0.34,1.56,0.64,1)',

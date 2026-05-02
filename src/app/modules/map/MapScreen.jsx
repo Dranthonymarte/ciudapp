@@ -44,6 +44,7 @@ export default function MapScreen() {
   useEffect(() => {
     supabase.from('reportes').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTotal(count ?? 0))
+      .catch(() => {/* contador LIVE no crítico */})
   }, [refreshTrigger])
 
   return (

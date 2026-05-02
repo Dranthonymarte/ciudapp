@@ -50,3 +50,4 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-04-28 — semana6-autenticacion: Supabase Auth + auth.store + useAuth + LoginScreen + RegisterScreen + ForgotPassword + AuthGuard + rutas protegidas
 ✅ 2026-04-28 — fixes-post-deploy: AuthLayout (BottomNav global), env vars Cloudflare, reglas arquitectura + tabla fallas conocidas
 ✅ 2026-05-02 — mobile-ui-redesign: MapScreen (header+LIVE badge+FAB geoloc) + MapFilters chips + LoginScreen splash dual-role + reverseGeocode Nominatim + deploy ✓
+✅ 2026-05-02 — semana7-reporte-detalle: ReportDetail bottom-sheet (mini mapa estático + geocoding + badge estado + autor) + UserMarker extraído + 5 bugs críticos/medios corregidos + roadmap S7-S12 sistematizado

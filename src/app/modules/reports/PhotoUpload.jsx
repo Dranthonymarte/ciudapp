@@ -1,8 +1,13 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 export default function PhotoUpload({ onPhoto }) {
   const inputRef = useRef()
   const [preview, setPreview] = useState(null)
+
+  // Liberar Object URL al cambiar o desmontar
+  useEffect(() => {
+    return () => { if (preview) URL.revokeObjectURL(preview) }
+  }, [preview])
 
   function handleFile(e) {
     const file = e.target.files[0]
@@ -12,6 +17,7 @@ export default function PhotoUpload({ onPhoto }) {
   }
 
   function quitar() {
+    if (preview) URL.revokeObjectURL(preview)
     setPreview(null)
     onPhoto(null)
     inputRef.current.value = ''

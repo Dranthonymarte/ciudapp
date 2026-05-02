@@ -4,6 +4,7 @@ export async function reverseGeocode(lat, lng) {
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`,
       { headers: { 'User-Agent': 'CiudApp/1.0 (ciudapp.com)' } }
     )
+    if (!res.ok) throw new Error(`Nominatim ${res.status}`)
     const { address, display_name } = await res.json()
     const { road, suburb, neighbourhood, quarter, city_district } = address ?? {}
     return road || suburb || neighbourhood || quarter || city_district

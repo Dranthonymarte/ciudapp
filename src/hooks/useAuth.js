@@ -1,23 +1,8 @@
-import { useEffect } from 'react'
+// Suscripción y setup de sesión viven en AppRouter.
+// Este hook solo lee del store — una sola fuente de verdad.
 import { useAuthStore } from '@/store/auth.store'
-import { getSession, onAuthStateChange } from '@/services/supabase.auth'
 
 export function useAuth() {
-  const { user, session, loading, error, setSession, setLoading } = useAuthStore()
-
-  useEffect(() => {
-    getSession().then(({ data }) => {
-      setSession(data.session)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = onAuthStateChange((_event, session) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
+  const { user, session, loading, error } = useAuthStore()
   return { user, session, loading, error }
 }
