@@ -4,14 +4,16 @@ export default function MapFilters() {
   const { filtroCategoria, setFiltro } = useMapStore()
 
   return (
-    <div style={{
-      position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-      zIndex: 1000, display: 'flex', gap: 6, flexWrap: 'nowrap',
-      background: 'rgba(10,12,16,0.85)', backdropFilter: 'blur(8px)',
-      borderRadius: 999, padding: '6px 10px',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.5)',
-      maxWidth: 'calc(100vw - 24px)', overflowX: 'auto',
+    <div className="map-filters" style={{
+      display: 'flex', gap: 6, flexShrink: 0,
+      overflowX: 'auto', scrollbarWidth: 'none',
+      padding: '8px 16px',
+      background: '#0A0C10',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
     }}>
+      <style>{`
+        .map-filters::-webkit-scrollbar { display: none; }
+      `}</style>
       {CATEGORIAS.map(cat => {
         const active = filtroCategoria === cat.id
         return (
@@ -19,11 +21,13 @@ export default function MapFilters() {
             key={cat.id}
             onClick={() => setFiltro(cat.id)}
             style={{
-              padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer',
-              fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', transition: 'all 0.15s',
+              padding: '6px 14px', borderRadius: 999, flexShrink: 0,
+              border: active ? 'none' : '1px solid rgba(255,255,255,0.12)',
+              cursor: 'pointer', fontSize: 12, fontWeight: 600,
+              whiteSpace: 'nowrap', transition: 'background 0.15s, color 0.15s',
               background: active ? cat.color : 'transparent',
-              color: active ? '#fff' : '#9CA3AF',
-              outline: active ? `2px solid ${cat.color}40` : 'none',
+              color: active ? '#fff' : '#8B95A5',
+              minHeight: 32,
             }}
           >
             {cat.label}

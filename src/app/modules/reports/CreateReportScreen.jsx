@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useUiStore } from '@/store/ui.store'
 import { useLocation } from '@/hooks/useLocation'
 import { useReportsStore } from '@/store/reports.store'
@@ -6,6 +6,7 @@ import ReportCategories from './ReportCategories'
 import PhotoUpload from './PhotoUpload'
 import { crearReporte } from './reports.service'
 import { subirFotoReporte } from '@/services/supabase.storage'
+import { reverseGeocode } from '@/utils/geo.utils'
 
 const PASO = { CAT: 0, DETALLE: 1, CONFIRMAR: 2 }
 
@@ -16,12 +17,17 @@ export default function CreateReportScreen() {
   const { lat, lng } = useLocation()
   const { addReporte } = useReportsStore()
 
-  const [paso,       setPaso]       = useState(PASO.CAT)
-  const [categoria,  setCategoria]  = useState(null)
-  const [foto,       setFoto]       = useState(null)
-  const [descripcion,setDescripcion]= useState('')
-  const [enviando,   setEnviando]   = useState(false)
-  const [error,      setError]      = useState(null)
+  const [paso,        setPaso]       = useState(PASO.CAT)
+  const [categoria,   setCategoria]  = useState(null)
+  const [foto,        setFoto]       = useState(null)
+  const [descripcion, setDescripcion]= useState('')
+  const [enviando,    setEnviando]   = useState(false)
+  const [error,       setError]      = useState(null)
+  const [direccion,   setDireccion]  = useState('')
+
+  useEffect(() => {
+    if (lat && lng) reverseGeocode(lat, lng).then(setDireccion)
+  }, [lat, lng])
 
   function reset() {
     setPaso(PASO.CAT); setCategoria(null)
@@ -156,7 +162,7 @@ export default function CreateReportScreen() {
               <div>
                 <div style={{ color: '#F0F2F5', fontSize: 13, fontWeight: 600 }}>Ubicación GPS</div>
                 <div style={{ color: '#8B95A5', fontSize: 11 }}>
-                  {lat && lng ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : 'Obteniendo ubicación...'}
+                  {direccion || (lat && lng ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : 'Obteniendo ubicación...')}
                 </div>
               </div>
             </div>
