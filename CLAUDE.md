@@ -49,3 +49,4 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-04-27 — semana5-modulo-reportes: wizard 3 taps + 8 categorías venezolanas + foto→Storage + BottomNav + integración mapa
 ✅ 2026-04-28 — semana6-autenticacion: Supabase Auth + auth.store + useAuth + LoginScreen + RegisterScreen + ForgotPassword + AuthGuard + rutas protegidas
 ✅ 2026-04-28 — fixes-post-deploy: AuthLayout (BottomNav global), env vars Cloudflare, reglas arquitectura + tabla fallas conocidas
+✅ 2026-05-02 — mobile-ui-redesign: MapScreen (header+LIVE badge+FAB geoloc) + MapFilters chips + LoginScreen splash dual-role + reverseGeocode Nominatim + deploy ✓
