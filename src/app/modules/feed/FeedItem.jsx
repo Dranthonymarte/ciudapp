@@ -9,10 +9,11 @@ const EMOJI = {
   salud: '🏥', transporte: '🚌',
 }
 const STATUS = {
-  nuevo:      { label: 'Nuevo',      color: '#3B82F6', bg: 'rgba(59,130,246,0.12)'  },
-  en_proceso: { label: 'En proceso', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)'  },
-  resuelto:   { label: 'Resuelto',   color: '#10B981', bg: 'rgba(16,185,129,0.12)'  },
-  rechazado:  { label: 'Rechazado',  color: '#EF4444', bg: 'rgba(239,68,68,0.12)'   },
+  nuevo:      { label: 'Nuevo',      color: '#3B82F6' },
+  en_proceso: { label: 'En proceso', color: '#F59E0B' },
+  resuelto:   { label: 'Resuelto',   color: '#10B981' },
+  rechazado:  { label: 'Rechazado',  color: '#6B7280' },
+  emergencia: { label: 'Emergencia', color: '#EF4444' },
 }
 
 function timeAgo(iso) {
@@ -21,6 +22,11 @@ function timeAgo(iso) {
   if (s < 3600)  return `${Math.floor(s / 60)}m`
   if (s < 86400) return `${Math.floor(s / 3600)}h`
   return `${Math.floor(s / 86400)}d`
+}
+
+function hexAlpha(hex, a) {
+  const n = parseInt(hex.slice(1), 16)
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
 }
 
 export default function FeedItem({ report, onClick }) {
@@ -33,38 +39,44 @@ export default function FeedItem({ report, onClick }) {
     <div
       onClick={onClick}
       style={{
-        background:   '#111318',
-        borderRadius: 14,
-        overflow:     'hidden',
-        cursor:       'pointer',
-        marginBottom: 10,
-        display:      'flex',
-        border:       '1px solid rgba(255,255,255,0.05)',
-        activeOpacity: 0.8,
+        background:              '#1A1D24',
+        borderRadius:            14,
+        overflow:                'hidden',
+        cursor:                  'pointer',
+        marginBottom:            10,
+        border:                  '1px solid rgba(255,255,255,0.06)',
+        boxShadow:               '0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)',
+        display:                 'flex',
+        WebkitTapHighlightColor: 'transparent',
       }}
     >
-      <div style={{ width: 4, background: color, flexShrink: 0 }} />
-
       <div style={{ flex: 1, padding: '12px 14px', minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 18, lineHeight: 1 }}>{emoji}</span>
+
+        {/* Category + status badges */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 8 }}>
           <span style={{
-            flex:       1,
-            color:      '#F0F2F5',
-            fontSize:   14,
-            fontWeight: 600,
-            lineHeight: 1.35,
-            minWidth:   0,
-          }}>
-            {report.titulo}
-          </span>
-          <span style={{
-            fontSize:     10,
+            display:      'inline-flex',
+            alignItems:   'center',
+            gap:          5,
+            background:   hexAlpha(color, 0.16),
+            color:        color,
+            borderRadius: 999,
+            padding:      '4px 10px',
+            fontSize:     11,
             fontWeight:   600,
+            whiteSpace:   'nowrap',
+          }}>
+            <span style={{ fontSize: 12, lineHeight: 1 }}>{emoji}</span>
+            {cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : 'Reporte'}
+          </span>
+
+          <span style={{
+            background:   hexAlpha(status.color, 0.12),
             color:        status.color,
-            background:   status.bg,
-            padding:      '3px 7px',
-            borderRadius: 99,
+            borderRadius: 999,
+            padding:      '4px 10px',
+            fontSize:     11,
+            fontWeight:   600,
             whiteSpace:   'nowrap',
             flexShrink:   0,
           }}>
@@ -72,27 +84,56 @@ export default function FeedItem({ report, onClick }) {
           </span>
         </div>
 
+        {/* Title */}
+        <p style={{
+          margin:      '0 0 6px',
+          color:       '#F0F2F5',
+          fontSize:    15,
+          fontWeight:  700,
+          lineHeight:  1.35,
+        }}>
+          {report.titulo}
+        </p>
+
+        {/* Description */}
         {report.descripcion && (
           <p style={{
-            margin:            '0 0 8px',
-            color:             '#8B95A5',
-            fontSize:          13,
-            lineHeight:        1.45,
-            display:           '-webkit-box',
-            WebkitLineClamp:   2,
-            WebkitBoxOrient:   'vertical',
-            overflow:          'hidden',
+            margin:              '0 0 8px',
+            color:               '#8B95A5',
+            fontSize:            13,
+            lineHeight:          1.45,
+            display:             '-webkit-box',
+            WebkitLineClamp:     2,
+            WebkitBoxOrient:     'vertical',
+            overflow:            'hidden',
           }}>
             {report.descripcion}
           </p>
         )}
 
+        {/* Meta */}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ color: '#4B5563', fontSize: 11 }}>{timeAgo(report.created_at)}</span>
-          {report.lat && (
+          <span style={{ fontSize: 11, color: '#4B5563' }}>
+            {timeAgo(report.created_at)}
+          </span>
+          {report.direccion && (
             <>
               <span style={{ color: '#4B5563', fontSize: 11 }}>·</span>
-              <span style={{ color: '#4B5563', fontSize: 11 }}>
+              <span style={{
+                color:        '#4B5563',
+                fontSize:     11,
+                overflow:     'hidden',
+                whiteSpace:   'nowrap',
+                textOverflow: 'ellipsis',
+              }}>
+                📍 {report.direccion}
+              </span>
+            </>
+          )}
+          {!report.direccion && report.lat && (
+            <>
+              <span style={{ color: '#4B5563', fontSize: 11 }}>·</span>
+              <span style={{ color: '#4B5563', fontSize: 11, fontFamily: 'monospace' }}>
                 {Number(report.lat).toFixed(3)}, {Number(report.lng).toFixed(3)}
               </span>
             </>
@@ -100,11 +141,19 @@ export default function FeedItem({ report, onClick }) {
         </div>
       </div>
 
+      {/* Photo thumbnail */}
       {report.foto_url && (
         <img
           src={report.foto_url}
           alt=""
-          style={{ width: 80, objectFit: 'cover', flexShrink: 0 }}
+          style={{
+            width:        80,
+            height:       'auto',
+            minHeight:    80,
+            objectFit:    'cover',
+            flexShrink:   0,
+            borderRadius: '0 14px 14px 0',
+          }}
         />
       )}
     </div>
