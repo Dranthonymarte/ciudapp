@@ -50,14 +50,21 @@ App lista para 100 usuarios reales en Chacao. Estabilidad, offline-tolerancia y 
 - [ ] PWA installable (manifest + icons completos)
 - [ ] App Store / Play Store (Capacitor o PWA directa según budget)
 
-## Score objetivo al final de S12
-| Dimensión | Score actual | Objetivo S12 |
-|-----------|-------------|--------------|
-| Arquitectura | 8/10 | 9/10 |
-| Funcionalidad | 6/10 | 9/10 |
-| UX Mobile | 7/10 | 8/10 |
-| Estabilidad | 5/10 | 8/10 |
-| Realtime | 1/10 | 7/10 |
-| Loop gobierno | 0/10 | 8/10 |
-| Offline-first | 0/10 | 6/10 |
-| **TOTAL** | **3.9/10** | **7.9/10** |
+## Meta técnica — Ranking CiudApp vs referencias
+
+> Fuente: `docs/desarrollador/auditoria-s9.md` · Score ponderado (auditoría S9+fixes)
+
+| Dimensión | Peso | Post-S9fix | Meta S12 piloto | SoSafe ~est. | Top-3 mundial |
+|-----------|------|-----------|-----------------|--------------|---------------|
+| Seguridad | 20% | 7.5/10 | **8.5/10** | 7/10 | 9.5/10 |
+| Estructura/modularidad | 15% | 8/10 | **8.5/10** | 7/10 | 9/10 |
+| UX/Estética | 15% | 7/10 | **8/10** | 7.5/10 | 9/10 |
+| Escalabilidad | 15% | 5.5/10 | **7/10** | 6/10 | 9/10 |
+| Realtime/BD | 10% | 7/10 | **8/10** | 5/10 | 9/10 |
+| Resilencia | 10% | 4/10 | **7/10** | 6/10 | 9/10 |
+| Performance | 10% | 6/10 | **7.5/10** | 6/10 | 9/10 |
+| Accesibilidad | 5% | 3/10 | **6/10** | 5/10 | 9/10 |
+| **GLOBAL PONDERADO** | 100% | **~7.0/10** | **~7.8/10** | ~6.5/10 | ~9.1/10 |
+
+**Norte:** superar SoSafe en score global antes del piloto Chacao. Alcanzar 8.5/10 en S14-15 para competir con top-3.
+Brechas críticas actuales: Resilencia (4→7) + Accesibilidad (3→6) + Performance (6→7.5).

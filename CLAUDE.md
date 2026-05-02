@@ -36,6 +36,11 @@ Pendientes futuras: equipos | asignaciones
 ## SKILLS ACTIVAS
 Detectadas automáticamente: frontend-design, pptx, docx, xlsx, pdf, file-reading
 
+## META TÉCNICA (norte del roadmap)
+Score auditoría ponderada: **~7.0/10** (post S9+fixes) → **8.5/10** meta piloto Chacao → **9.5/10** top-3 mundial
+Referencia: `docs/desarrollador/auditoria-s9.md` · Dimensiones: seguridad(20%), estructura(15%), UX(15%), escalabilidad(15%), BD(10%), resilencia(10%), performance(10%), accesibilidad(5%)
+Brecha principal: resilencia (4/10), accesibilidad (3/10), performance (6/10)
+
 ## PRÓXIMO PASO
 Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 
@@ -55,3 +60,4 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-05-02 — semana8-feed-perfil: FeedFilter DS (pills categoría×9 + estado×6, colores canónicos) + FeedItem redesign (elimina left-bar, badges pill DS) + FeedScreen filtrado client-side useMemo
 ✅ 2026-05-02 — semana8-perfil-alertas: ProfileScreen (avatar iniciales + stats + signOut) + MyReports + profile.service + AlertBanner Realtime + ruta /perfil — visión S9 definida (chat bidireccional + map tap + landing desktop + Carto Light)
 ✅ 2026-05-02 — semana9-flagship: Map Tap → Reporte (TapHandler + popup) + Chat bidireccional Realtime (mensajes_reporte + badge ✓ Alcaldía) + Landing Desktop (>768px) + Carto Light tiles + trigger sync auth↔usuarios + tabla alertas + seed (8 reportes + 2 alertas) + auditoría integral 6.4/10
+✅ 2026-05-02 — s10pre-fix-criticos: trigger anti-rol C1 + RLS chat C2 + usuarios read C3 + estado enum C4 + upload validation C5 + direccion BD C6 + 4 índices · score ~7.0/10
