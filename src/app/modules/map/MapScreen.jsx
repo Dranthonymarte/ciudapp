@@ -1,44 +1,18 @@
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, useMap } from 'react-leaflet'
-import { useEffect, useState, useRef } from 'react'
-import L from 'leaflet'
+import { useEffect, useState } from 'react'
 import MapLayer from './MapLayer'
 import IncidentMarker from './IncidentMarker'
 import MapFilters from './MapFilters'
+import UserMarker from './UserMarker'
 import { useLocation } from '@/hooks/useLocation'
 import { useMapStore } from '@/store/map.store'
 import { supabase } from '@/services/supabase.client'
 import CreateReportScreen from '@/app/modules/reports/CreateReportScreen'
+import ReportDetail from '@/app/modules/reports/ReportDetail'
 import { useReportsStore } from '@/store/reports.store'
 
 const CARACAS = [10.4806, -66.9036]
-
-const USER_ICON = L.divIcon({
-  className: '',
-  html: `<div style="
-    width:16px;height:16px;border-radius:50%;
-    background:#3B82F6;border:3px solid #fff;
-    box-shadow:0 0 0 4px rgba(59,130,246,0.35);
-  "></div>`,
-  iconSize:   [16, 16],
-  iconAnchor: [8, 8],
-})
-
-function UserMarker({ lat, lng }) {
-  const map      = useMap()
-  const centrado = useRef(false)
-  useEffect(() => {
-    const marker = L.marker([lat, lng], { icon: USER_ICON, zIndexOffset: 1000 })
-      .addTo(map)
-      .bindTooltip('Estás aquí', { permanent: false, direction: 'top' })
-    if (!centrado.current) {
-      map.setView([lat, lng], 14, { animate: true })
-      centrado.current = true
-    }
-    return () => marker.remove()
-  }, [lat, lng, map])
-  return null
-}
 
 function MapFlyTo({ lat, lng, trigger }) {
   const map = useMap()
@@ -52,9 +26,10 @@ export default function MapScreen() {
   const { lat, lng }        = useLocation()
   const { filtroCategoria } = useMapStore()
   const { refreshTrigger }  = useReportsStore()
-  const [reportes,    setReportes]    = useState([])
-  const [totalActivos, setTotal]      = useState(0)
-  const [flyTrigger,  setFlyTrigger]  = useState(0)
+  const [reportes,         setReportes]  = useState([])
+  const [totalActivos,     setTotal]     = useState(0)
+  const [flyTrigger,       setFlyTrigger]= useState(0)
+  const [selectedReporte,  setSelected]  = useState(null)
 
   useEffect(() => {
     async function cargar() {
@@ -114,7 +89,7 @@ export default function MapScreen() {
           {lat && lng && <UserMarker lat={lat} lng={lng} />}
           <MapFlyTo lat={lat} lng={lng} trigger={flyTrigger} />
           {reportes.map(r => (
-            <IncidentMarker key={r.id} reporte={{ ...r, categoria: r.categoria_id }} />
+            <IncidentMarker key={r.id} reporte={{ ...r, categoria: r.categoria_id }} onSelect={setSelected} />
           ))}
         </MapContainer>
 
@@ -137,6 +112,7 @@ export default function MapScreen() {
       </div>
 
       <CreateReportScreen />
+      <ReportDetail reporte={selectedReporte} onClose={() => setSelected(null)} />
 
       <style>{`
         @keyframes livePulse {

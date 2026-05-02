@@ -1,4 +1,4 @@
-import { Marker, Popup } from 'react-leaflet'
+import { Marker } from 'react-leaflet'
 import L from 'leaflet'
 
 const COLORS = {
@@ -26,14 +26,13 @@ function makeIcon(color) {
   })
 }
 
-export default function IncidentMarker({ reporte }) {
+export default function IncidentMarker({ reporte, onSelect }) {
   const color = COLORS[reporte.categoria] ?? COLORS.default
   return (
-    <Marker position={[reporte.lat, reporte.lng]} icon={makeIcon(color)}>
-      <Popup>
-        <strong>{reporte.titulo}</strong><br />
-        <span style={{ fontSize: 12, color: '#6B7280' }}>{reporte.categoria}</span>
-      </Popup>
-    </Marker>
+    <Marker
+      position={[reporte.lat, reporte.lng]}
+      icon={makeIcon(color)}
+      eventHandlers={{ click: () => onSelect?.(reporte) }}
+    />
   )
 }
