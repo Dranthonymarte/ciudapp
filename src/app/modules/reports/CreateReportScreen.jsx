@@ -54,6 +54,7 @@ export default function CreateReportScreen() {
         titulo:       `${categoria.emoji} ${categoria.label} reportado`,
         descripcion:  descripcion.trim() || null,
         lat, lng, foto_url,
+        direccion:    direccion.trim() || null,
       })
       addReporte(reporte)
       cerrar()

@@ -1,9 +1,9 @@
 import { supabase } from '@/services/supabase.client'
 
-export async function crearReporte({ categoria_id, titulo, descripcion, lat, lng, foto_url }) {
+export async function crearReporte({ categoria_id, titulo, descripcion, lat, lng, foto_url, direccion }) {
   const { data, error } = await supabase
     .from('reportes')
-    .insert([{ categoria_id, titulo, descripcion, lat, lng, foto_url, estado: 'nuevo' }])
+    .insert([{ categoria_id, titulo, descripcion, lat, lng, foto_url, direccion: direccion || null, estado: 'nuevo' }])
     .select()
     .single()
   if (error) throw error
