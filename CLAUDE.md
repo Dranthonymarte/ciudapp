@@ -4,7 +4,7 @@
 
 ## PROYECTO
 - Nombre: **CiudApp** — Red ciudadana B2G para Venezuela
-- Fase: 2 — MVP Core (sem 9 en curso)
+- Fase: 2 — MVP Core (S9 cerrada, S10 = rol Alcaldía)
 - Stack: React 18 + Vite | Supabase | Cloudflare Pages | Leaflet + Carto Light | Zustand
 - Piloto: Chacao (Caracas)
 - App 100% mobile-first — desktop → landing page
@@ -17,8 +17,9 @@
 4. **contexto/CTX-03-stack-tech.md** — Stack detallado (si trabajas en tech)
 5. **contexto/CTX-04-equipo.md** — Roles y horarios (si necesitas coordinación)
 
-## ESQUEMA SUPABASE (miniatura)
-usuarios | municipios | categorías | reportes | alertas | equipos | asignaciones
+## ESQUEMA SUPABASE (miniatura — actualizado S9)
+usuarios (con rol) | municipios | categorias | reportes | mensajes_reporte | alertas
+Pendientes futuras: equipos | asignaciones
 
 (Schema completo en docs/desarrollador/README.md)
 
@@ -53,3 +54,4 @@ Lee reglas/REGLAS-PERMANENTES.md antes de iniciar sesión.
 ✅ 2026-05-02 — semana7-reporte-detalle: ReportDetail bottom-sheet (mini mapa estático + geocoding + badge estado + autor) + UserMarker extraído + 5 bugs críticos/medios corregidos + roadmap S7-S12 sistematizado
 ✅ 2026-05-02 — semana8-feed-perfil: FeedFilter DS (pills categoría×9 + estado×6, colores canónicos) + FeedItem redesign (elimina left-bar, badges pill DS) + FeedScreen filtrado client-side useMemo
 ✅ 2026-05-02 — semana8-perfil-alertas: ProfileScreen (avatar iniciales + stats + signOut) + MyReports + profile.service + AlertBanner Realtime + ruta /perfil — visión S9 definida (chat bidireccional + map tap + landing desktop + Carto Light)
+✅ 2026-05-02 — semana9-flagship: Map Tap → Reporte (TapHandler + popup) + Chat bidireccional Realtime (mensajes_reporte + badge ✓ Alcaldía) + Landing Desktop (>768px) + Carto Light tiles + trigger sync auth↔usuarios + tabla alertas + seed (8 reportes + 2 alertas) + auditoría integral 6.4/10
